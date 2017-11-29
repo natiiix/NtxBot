@@ -25,7 +25,7 @@ namespace NtxBot
 
             public bool Pressed
             {
-                get { return pressed; }
+                get => pressed;
 
                 set
                 {

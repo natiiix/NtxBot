@@ -5,6 +5,8 @@ namespace NtxBot
 {
     public partial class Plugin
     {
+        private string currentMapName;
+
         private static void TeleportToNexus(Client client)
         {
             client.SendToServer(Packet.Create(PacketType.ESCAPE));

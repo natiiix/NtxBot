@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 
 namespace NtxBot
 {
@@ -11,6 +12,12 @@ namespace NtxBot
 
         public void AppendLog(string text)
         {
+            // Add a line between log entries
+            if (richTextBoxLog.Text != string.Empty)
+            {
+                richTextBoxLog.Text += Environment.NewLine;
+            }
+
             // Append the input text to the log
             richTextBoxLog.Text += text;
 
