@@ -23,7 +23,6 @@ namespace NtxBot
 
             proxy.HookPacket(PacketType.UPDATE, OnUpdate);
             proxy.HookPacket(PacketType.NEWTICK, OnNewTick);
-            proxy.HookPacket(PacketType.PLAYERHIT, OnHit);
             proxy.HookPacket(PacketType.MAPINFO, OnMapInfo);
             proxy.HookPacket(PacketType.TEXT, OnText);
 
