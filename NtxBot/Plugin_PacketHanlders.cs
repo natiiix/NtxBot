@@ -1,19 +1,18 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+﻿using Lib_K_Relay.GameData;
 using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets;
-using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.DataObjects;
-using Lib_K_Relay.GameData;
-using Lib_K_Relay.GameData.DataStructures;
+using Lib_K_Relay.Networking.Packets.Server;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NtxBot
 {
     public partial class Plugin
     {
         private string mapName;
-        private List<Tile> tiles;
+        private List<Tile> tiles = new List<Tile>();
+        private List<Entity> objects = new List<Entity>();
 
         private Location lastKnownPlayerLocation;
 
@@ -22,14 +21,9 @@ namespace NtxBot
             UpdatePacket up = (UpdatePacket)p;
             if (up == null) return;
 
-            // Create the tile list if it doesn't exist
-            if (tiles == null)
-            {
-                tiles = new List<Tile>();
-            }
-
-            // Add the new tiles to the list
+            // Add the new tiles and objects to their respective lists
             tiles.AddRange(up.Tiles);
+            objects.AddRange(up.NewObjs);
 
             // Get the player's current location
             Location playerLocation = client.PlayerData.Pos;
@@ -47,8 +41,7 @@ namespace NtxBot
             // Player has moved
             else if (playerLocation.X != lastKnownPlayerLocation.X || playerLocation.Y != lastKnownPlayerLocation.Y)
             {
-                Log("Moved from " + lastKnownPlayerLocation.ToString() + " to " + playerLocation.ToString());
-
+                //Log("Moved from " + lastKnownPlayerLocation.ToString() + " to " + playerLocation.ToString());
                 lastKnownPlayerLocation = playerLocation;
 
                 // Find what tile is the player standing on
@@ -56,8 +49,14 @@ namespace NtxBot
 
                 if (currentTileIdx >= 0)
                 {
-                    Log(GameData.Tiles.ByID(tiles[currentTileIdx].Type).Name);
+                    Log(playerLocation.ToString() + " : " + tiles[currentTileIdx].Type.ToString() + " - " + GameData.Tiles.ByID(tiles[currentTileIdx].Type).Name);
                 }
+
+                // Find all objects located on the tile the player is currently standing on and write information about them to the log
+                objects.Where(x => (int)x.Status.Position.X == (int)playerLocation.X && (int)x.Status.Position.Y == (int)playerLocation.Y).ForEach(x =>
+                {
+                    Log(x.ObjectType.ToString() + " - " + GameData.Objects.ByID(x.ObjectType).Name);
+                });
             }
 
             // TODO
@@ -72,8 +71,9 @@ namespace NtxBot
             // Copy the name of the map
             mapName = mip.Name;
 
-            // Clear the map tiles list
+            // Clear the map-specific lists
             tiles?.Clear();
+            objects?.Clear();
 
             // Write the current map to the log
             Log("Current map: " + mapName ?? "null");
