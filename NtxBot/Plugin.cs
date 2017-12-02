@@ -37,7 +37,7 @@ namespace NtxBot
             {
                 ui = new FormUI();
                 ui.Show();
-                PluginUtils.ShowGUI(ui);
+                //PluginUtils.ShowGUI(ui);
             }
         }
     }

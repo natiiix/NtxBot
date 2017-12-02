@@ -13,6 +13,8 @@ namespace NtxBot
         private string mapName;
         private List<Tile> tiles;
 
+        private Location lastKnownPlayerLocation;
+
         private void OnUpdate(Client client, Packet p)
         {
             UpdatePacket up = (UpdatePacket)p;
@@ -20,6 +22,21 @@ namespace NtxBot
 
             // Get the player's current location
             Location playerLocation = client.PlayerData.Pos;
+
+            if (playerLocation == null)
+            {
+                Log("Player location = null");
+            }
+            else if (lastKnownPlayerLocation == null)
+            {
+                lastKnownPlayerLocation = playerLocation;
+            }
+            else if (playerLocation.X != lastKnownPlayerLocation.X || playerLocation.Y != lastKnownPlayerLocation.Y)
+            {
+                Log("Moved from " + lastKnownPlayerLocation.ToString() + " to " + playerLocation.ToString());
+
+                lastKnownPlayerLocation = playerLocation;
+            }
 
             // Create the tile list if it doesn't exist
             if (tiles == null)
@@ -70,7 +87,7 @@ namespace NtxBot
             tiles?.Clear();
 
             // Write the current map to the log
-            Log("Current map: " + mapName);
+            Log("Current map: " + mapName ?? "null");
         }
 
         private void OnNewTick(Client client, Packet p)

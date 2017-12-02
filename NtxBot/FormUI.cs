@@ -10,7 +10,9 @@ namespace NtxBot
             InitializeComponent();
         }
 
-        public void AppendLog(string text)
+        public void AppendLog(string text) => richTextBoxLog.Invoke(new Action(() => AppendLogUnsafe(text)));
+
+        private void AppendLogUnsafe(string text)
         {
             // Add a line between log entries
             if (richTextBoxLog.Text != string.Empty)
