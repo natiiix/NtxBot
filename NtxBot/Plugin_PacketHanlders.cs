@@ -1,15 +1,58 @@
-﻿using Lib_K_Relay.Networking;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets;
 using Lib_K_Relay.Networking.Packets.Server;
+using Lib_K_Relay.Networking.Packets.DataObjects;
 
 namespace NtxBot
 {
     public partial class Plugin
     {
+        private string mapName;
+        private List<Tile> tiles;
+
         private void OnUpdate(Client client, Packet p)
         {
             UpdatePacket up = (UpdatePacket)p;
             if (up == null) return;
+
+            // Get the player's current location
+            Location playerLocation = client.PlayerData.Pos;
+
+            // Create the tile list if it doesn't exist
+            if (tiles == null)
+            {
+                tiles = new List<Tile>();
+            }
+
+            // Add the new tiles to the list
+            tiles.AddRange(up.Tiles);
+
+            int currentTileIdx = tiles.FindIndex(x => x.X == ((int)Math.Round(playerLocation.X)) && x.Y == ((int)Math.Round(playerLocation.Y)));
+
+            if (currentTileIdx >= 0)
+            {
+                Log(tiles[currentTileIdx].Type.ToString());
+            }
+
+            //{
+            //    Log("Number of new tiles: " + up.Tiles.Length.ToString());
+
+            //    Tile firstTile = up.Tiles.First();
+            //    Log(string.Format("Tile: X={0} Y={1} Type={2}", firstTile.X, firstTile.Y, firstTile.Type));
+
+            //    Log(string.Format("Player: X={0} Y={1}", (short)Math.Round(playerLocation.X), (short)Math.Round(playerLocation.Y)));
+            //}
+
+            // Find the tile on which the player is currently standing
+            //List<Tile> standingOn = currentMapTiles.Where(x => x.X == (short)Math.Round(playerLocation.X) && x.X == (short)Math.Round(playerLocation.Y)).ToList();
+
+            //if (standingOn.Count > 0)
+            //{
+            //    Log(string.Format("Standing on {0} tiles: {1}", standingOn.Count, string.Join(", ", standingOn.Select(x => x.Type.ToString()))));
+            //}
 
             // TODO
         }
@@ -21,10 +64,13 @@ namespace NtxBot
             if (mip == null) return;
 
             // Copy the name of the map
-            currentMapName = mip.Name;
+            mapName = mip.Name;
+
+            // Clear the map tiles list
+            tiles?.Clear();
 
             // Write the current map to the log
-            Log("Current map: " + currentMapName);
+            Log("Current map: " + mapName);
         }
 
         private void OnNewTick(Client client, Packet p)
