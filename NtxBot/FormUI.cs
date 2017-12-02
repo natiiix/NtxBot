@@ -10,7 +10,7 @@ namespace NtxBot
             InitializeComponent();
         }
 
-        public void AppendLog(string text) => richTextBoxLog.Invoke(new Action(() => AppendLogUnsafe(text)));
+        public void AppendLog(string text) => richTextBoxLog.BeginInvoke(new Action(() => AppendLogUnsafe(text)));
 
         private void AppendLogUnsafe(string text)
         {
