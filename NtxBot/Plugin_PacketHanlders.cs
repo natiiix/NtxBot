@@ -25,6 +25,9 @@ namespace NtxBot
             tiles.AddRange(up.Tiles);
             objects.AddRange(up.NewObjs);
 
+            // Remove all the dropped (no longer present) objects
+            up.Drops.ForEach(x => objects.RemoveAll(y => y.Status.ObjectId == x));
+
             // Get the player's current location
             Location playerLocation = client.PlayerData.Pos;
 
