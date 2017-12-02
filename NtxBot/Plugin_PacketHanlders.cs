@@ -5,6 +5,8 @@ using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets;
 using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.DataObjects;
+using Lib_K_Relay.GameData;
+using Lib_K_Relay.GameData.DataStructures;
 
 namespace NtxBot
 {
@@ -54,26 +56,9 @@ namespace NtxBot
 
                 if (currentTileIdx >= 0)
                 {
-                    Log(tiles[currentTileIdx].Type.ToString());
+                    Log(GameData.Tiles.ByID(tiles[currentTileIdx].Type).Name);
                 }
             }
-
-            //{
-            //    Log("Number of new tiles: " + up.Tiles.Length.ToString());
-
-            //    Tile firstTile = up.Tiles.First();
-            //    Log(string.Format("Tile: X={0} Y={1} Type={2}", firstTile.X, firstTile.Y, firstTile.Type));
-
-            //    Log(string.Format("Player: X={0} Y={1}", (short)Math.Round(playerLocation.X), (short)Math.Round(playerLocation.Y)));
-            //}
-
-            // Find the tile on which the player is currently standing
-            //List<Tile> standingOn = currentMapTiles.Where(x => x.X == (short)Math.Round(playerLocation.X) && x.X == (short)Math.Round(playerLocation.Y)).ToList();
-
-            //if (standingOn.Count > 0)
-            //{
-            //    Log(string.Format("Standing on {0} tiles: {1}", standingOn.Count, string.Join(", ", standingOn.Select(x => x.Type.ToString()))));
-            //}
 
             // TODO
         }
