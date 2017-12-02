@@ -20,24 +20,6 @@ namespace NtxBot
             UpdatePacket up = (UpdatePacket)p;
             if (up == null) return;
 
-            // Get the player's current location
-            Location playerLocation = client.PlayerData.Pos;
-
-            if (playerLocation == null)
-            {
-                Log("Player location = null");
-            }
-            else if (lastKnownPlayerLocation == null)
-            {
-                lastKnownPlayerLocation = playerLocation;
-            }
-            else if (playerLocation.X != lastKnownPlayerLocation.X || playerLocation.Y != lastKnownPlayerLocation.Y)
-            {
-                Log("Moved from " + lastKnownPlayerLocation.ToString() + " to " + playerLocation.ToString());
-
-                lastKnownPlayerLocation = playerLocation;
-            }
-
             // Create the tile list if it doesn't exist
             if (tiles == null)
             {
@@ -47,11 +29,33 @@ namespace NtxBot
             // Add the new tiles to the list
             tiles.AddRange(up.Tiles);
 
-            int currentTileIdx = tiles.FindIndex(x => x.X == ((int)Math.Round(playerLocation.X)) && x.Y == ((int)Math.Round(playerLocation.Y)));
+            // Get the player's current location
+            Location playerLocation = client.PlayerData.Pos;
 
-            if (currentTileIdx >= 0)
+            // Null current player locaiton
+            if (playerLocation == null)
             {
-                Log(tiles[currentTileIdx].Type.ToString());
+                Log("Player location = null");
+            }
+            // Last known player location not set
+            else if (lastKnownPlayerLocation == null)
+            {
+                lastKnownPlayerLocation = playerLocation;
+            }
+            // Player has moved
+            else if (playerLocation.X != lastKnownPlayerLocation.X || playerLocation.Y != lastKnownPlayerLocation.Y)
+            {
+                Log("Moved from " + lastKnownPlayerLocation.ToString() + " to " + playerLocation.ToString());
+
+                lastKnownPlayerLocation = playerLocation;
+
+                // Find what tile is the player standing on
+                int currentTileIdx = tiles.FindIndex(x => x.X == (short)playerLocation.X && x.Y == (short)playerLocation.Y);
+
+                if (currentTileIdx >= 0)
+                {
+                    Log(tiles[currentTileIdx].Type.ToString());
+                }
             }
 
             //{
