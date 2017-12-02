@@ -87,6 +87,9 @@ namespace NtxBot
             NewTickPacket ntp = (NewTickPacket)p;
             if (ntp == null) return;
 
+            // Update object statuses
+            ntp.Statuses.ForEach(x => objects.FindAll(y => y.Status.ObjectId == x.ObjectId).ForEach(y => y.Status = x));
+
             // TODO
         }
 
