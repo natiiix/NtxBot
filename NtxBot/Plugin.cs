@@ -48,11 +48,16 @@ namespace NtxBot
                 else
                 {
                     // Tile type
-                    Log("Tile type: " + ConvertTileTypeToString(tile.TileType));
+                    Log("Type: " + ConvertTileTypeToString(tile.TileType));
 
                     // List of objects on that tile
                     tile.Objects.ForEach(obj => Log(ConvertObjectTypeToString(obj)));
                 }
+            });
+
+            proxy.HookCommand("living", (client, cmd, args) =>
+            {
+                map.LivingEntities.ForEach(x => Log(ConvertObjectTypeToString(x.ObjectType)));
             });
 
             proxy.HookPacket(PacketType.UPDATE, OnUpdate);

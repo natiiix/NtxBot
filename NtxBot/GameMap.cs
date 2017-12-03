@@ -19,7 +19,7 @@ namespace NtxBot
         public readonly int Height;
 
         private GameMapTile[] tiles;
-        private List<Entity> livingEntities;
+        public List<Entity> LivingEntities { get; private set; }
 
         public GameMap(MapInfoPacket mip)
         {
@@ -28,7 +28,7 @@ namespace NtxBot
             Height = mip.Height;
 
             tiles = new GameMapTile[Height * Width];
-            livingEntities = new List<Entity>();
+            LivingEntities = new List<Entity>();
         }
 
         private int CoordinatesToIndex(int x, int y) => (y * Width) + x;
@@ -73,12 +73,11 @@ namespace NtxBot
             // New objects
             foreach (Entity ent in p.NewObjs)
             {
-                // Objects with HP are not stored inside tile objects
-                if (ent.HasHP())
-                {
-                    livingEntities.Add(ent);
-                }
-                else
+                Lib_K_Relay.GameData.DataStructures.ObjectStructure objStruct = GameData.Objects.ByID(ent.ObjectType);
+
+                // Objects with 0 maximum HP are immobile world elements
+                // These objects are stored inside of the tiles on which they're standing
+                if (objStruct.MaxHP == 0 && objStruct.ObjectClass != "Pet")
                 {
                     // Get the tile index
                     int x = (int)ent.Status.Position.X;
@@ -104,13 +103,18 @@ namespace NtxBot
                         tiles[idx].Objects.Add(type);
                     }
                 }
+                // Add new living entities to the list
+                else
+                {
+                    LivingEntities.Add(ent);
+                }
             }
 
             // Drops
             foreach (int objId in p.Drops)
             {
                 // Remove objects with the specified object ID from the list
-                livingEntities.RemoveAll(x => x.Status.ObjectId == objId);
+                LivingEntities.RemoveAll(x => x.Status.ObjectId == objId);
             }
         }
 
@@ -119,7 +123,7 @@ namespace NtxBot
             // Update statuses of living entities
             foreach (Status stat in p.Statuses)
             {
-                livingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x => x.Status = stat);
+                LivingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x => x.Status = stat);
             }
         }
     }

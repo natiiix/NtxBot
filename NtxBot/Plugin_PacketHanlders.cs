@@ -31,6 +31,12 @@ namespace NtxBot
             //distinctObjects.AddRange(up.NewObjs.Where(x => !distinctObjects.Contains(x.ObjectType)).Select(x => x.ObjectType));
 
             map?.ProcessPacket(up);
+
+            //up.NewObjs.Where(x => GameData.Objects.ByID(x.ObjectType).MaxHP == 0 && GameData.Objects.ByID(x.ObjectType).Size != 0).ForEach(x =>
+            //{
+            //    Lib_K_Relay.GameData.DataStructures.ObjectStructure obj = GameData.Objects.ByID(x.ObjectType);
+            //    Log(ConvertObjectTypeToString(x.ObjectType) + string.Format(" [ {0} | {1} | {2} | {3} | {4} | {5} | {6} | {7} | {8} | {9} | {10} ]", obj.ObjectClass, obj.Static, obj.OccupySquare, obj.FullOccupy, obj.Flying, obj.DrawOnGround, obj.Defense, obj.Size, obj.ShadowSize, obj.XPMult, obj.MaxHP));
+            //});
         }
 
         private void OnMapInfo(Client client, Packet p)
