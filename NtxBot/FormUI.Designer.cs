@@ -39,7 +39,7 @@
             this.richTextBoxLog.Location = new System.Drawing.Point(12, 12);
             this.richTextBoxLog.Name = "richTextBoxLog";
             this.richTextBoxLog.ReadOnly = true;
-            this.richTextBoxLog.Size = new System.Drawing.Size(280, 177);
+            this.richTextBoxLog.Size = new System.Drawing.Size(440, 257);
             this.richTextBoxLog.TabIndex = 1;
             this.richTextBoxLog.Text = "";
             // 
@@ -47,7 +47,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(304, 201);
+            this.ClientSize = new System.Drawing.Size(464, 281);
             this.Controls.Add(this.richTextBoxLog);
             this.Name = "FormUI";
             this.Text = "NTX Bot";

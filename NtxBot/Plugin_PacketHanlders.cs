@@ -3,66 +3,34 @@ using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets;
 using Lib_K_Relay.Networking.Packets.DataObjects;
 using Lib_K_Relay.Networking.Packets.Server;
+using Lib_K_Relay.Networking.Packets.Client;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace NtxBot
 {
     public partial class Plugin
     {
-        private string mapName;
-        private List<Tile> tiles = new List<Tile>();
-        private List<Entity> objects = new List<Entity>();
+        private GameMap map;
 
-        private Location lastKnownPlayerLocation;
+        //private List<ushort> distinctTiles = new List<ushort>();
+        //private List<ushort> distinctObjects = new List<ushort>();
+
+        private DateTime? dtLastTick = null;
+        private Location moveTarget = null;
+        private bool blockNextGotoAck = false;
 
         private void OnUpdate(Client client, Packet p)
         {
             UpdatePacket up = (UpdatePacket)p;
             if (up == null) return;
 
-            // Add the new tiles and objects to their respective lists
-            tiles.AddRange(up.Tiles);
-            objects.AddRange(up.NewObjs);
+            // Add distinct tiles and object types to the lists
+            //distinctTiles.AddRange(up.Tiles.Where(x => !distinctTiles.Contains(x.Type)).Select(x => x.Type));
+            //distinctObjects.AddRange(up.NewObjs.Where(x => !distinctObjects.Contains(x.ObjectType)).Select(x => x.ObjectType));
 
-            // Remove all the dropped (no longer present) objects
-            up.Drops.ForEach(x => objects.RemoveAll(y => y.Status.ObjectId == x));
-
-            // Get the player's current location
-            Location playerLocation = client.PlayerData.Pos;
-
-            // Null current player locaiton
-            if (playerLocation == null)
-            {
-                Log("Player location = null");
-            }
-            // Last known player location not set
-            else if (lastKnownPlayerLocation == null)
-            {
-                lastKnownPlayerLocation = playerLocation;
-            }
-            // Player has moved
-            else if (playerLocation.X != lastKnownPlayerLocation.X || playerLocation.Y != lastKnownPlayerLocation.Y)
-            {
-                //Log("Moved from " + lastKnownPlayerLocation.ToString() + " to " + playerLocation.ToString());
-                lastKnownPlayerLocation = playerLocation;
-
-                // Find what tile is the player standing on
-                int currentTileIdx = tiles.FindIndex(x => x.X == (short)playerLocation.X && x.Y == (short)playerLocation.Y);
-
-                if (currentTileIdx >= 0)
-                {
-                    Log(playerLocation.ToString() + " : " + tiles[currentTileIdx].Type.ToString() + " - " + GameData.Tiles.ByID(tiles[currentTileIdx].Type).Name);
-                }
-
-                // Find all objects located on the tile the player is currently standing on and write information about them to the log
-                objects.Where(x => (int)x.Status.Position.X == (int)playerLocation.X && (int)x.Status.Position.Y == (int)playerLocation.Y).ForEach(x =>
-                {
-                    Log(x.ObjectType.ToString() + " - " + GameData.Objects.ByID(x.ObjectType).Name);
-                });
-            }
-
-            // TODO
+            map?.ProcessPacket(up);
         }
 
         private void OnMapInfo(Client client, Packet p)
@@ -71,15 +39,15 @@ namespace NtxBot
             MapInfoPacket mip = p as MapInfoPacket;
             if (mip == null) return;
 
-            // Copy the name of the map
-            mapName = mip.Name;
+            // Create a new map object
+            map = new GameMap(mip);
 
-            // Clear the map-specific lists
-            tiles?.Clear();
-            objects?.Clear();
+            // Distinct tile and objects are map-specific
+            //distinctTiles?.Clear();
+            //distinctObjects?.Clear();
 
-            // Write the current map to the log
-            Log("Current map: " + mapName ?? "null");
+            // Write the name of the map to the log
+            Log("Current map: " + map.Name ?? "null");
         }
 
         private void OnNewTick(Client client, Packet p)
@@ -87,19 +55,31 @@ namespace NtxBot
             NewTickPacket ntp = (NewTickPacket)p;
             if (ntp == null) return;
 
-            // Update object statuses
-            ntp.Statuses.ForEach(x => objects.FindAll(y => y.Status.ObjectId == x.ObjectId).ForEach(y => y.Status = x));
+            map?.ProcessPacket(ntp);
 
-            // TODO
+            // Move player towards target location
+            if (dtLastTick == null || moveTarget == null)
+            {
+                dtLastTick = DateTime.Now;
+                return;
+            }
+
+            TimeSpan deltaTime = DateTime.Now - dtLastTick.Value;
+            dtLastTick = DateTime.Now;
+
+            MovePlayerTowardsTarget(client, ntp.TickId, deltaTime);
         }
 
-        private void OnText(Client client, Packet p)
+        private void OnGotoAck(Client client, Packet p)
         {
-            // Convert the packet
-            TextPacket tp = p as TextPacket;
-            if (tp == null) return;
+            GotoAckPacket gackp = p as GotoAckPacket;
+            if (gackp == null) return;
 
-            // TODO
+            if (blockNextGotoAck)
+            {
+                gackp.Send = false;
+                blockNextGotoAck = false;
+            }
         }
     }
 }
