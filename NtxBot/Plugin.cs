@@ -35,11 +35,13 @@ namespace NtxBot
 
             proxy.HookCommand("tileinfo", (client, cmd, args) =>
             {
-                // Find the tile
-                int x = (int)client.PlayerData.Pos.X;
-                int y = (int)client.PlayerData.Pos.Y;
+                if (args.Length != 2)
+                {
+                    Log("Invalid arguments!");
+                    return;
+                }
 
-                GameMapTile tile = map.GetTile(x, y);
+                GameMapTile tile = map.GetTile(int.Parse(args[0]), int.Parse(args[1]));
 
                 if (tile == null)
                 {
@@ -52,9 +54,19 @@ namespace NtxBot
 
                     // List of objects on that tile
                     tile.Objects.ForEach(obj => Log(ConvertObjectTypeToString(obj)));
+
+                    // Information about tile's safety
+                    Log(tile.Safe ? "SAFE" : "UNSAFE");
                 }
             });
 
+            // Information about player's location
+            proxy.HookCommand("where", (client, cmd, args) =>
+            {
+                Log("Player's location: " + client.PlayerData.Pos.ToString());
+            });
+
+            // Information about living entities on the current map
             proxy.HookCommand("living", (client, cmd, args) =>
             {
                 map.LivingEntities.ForEach(x => Log(ConvertObjectTypeToString(x.ObjectType)));
