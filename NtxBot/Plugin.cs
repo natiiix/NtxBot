@@ -1,6 +1,7 @@
 ﻿using Lib_K_Relay;
 using Lib_K_Relay.Interface;
 using Lib_K_Relay.Networking.Packets;
+using Lib_K_Relay.Networking.Packets.Server;
 
 namespace NtxBot
 {
@@ -59,9 +60,9 @@ namespace NtxBot
                 map.LivingEntities.ForEach(x => Log(ConvertObjectTypeToString(x.ObjectType)));
             });
 
-            proxy.HookPacket(PacketType.UPDATE, OnUpdate);
-            proxy.HookPacket(PacketType.NEWTICK, OnNewTick);
-            proxy.HookPacket(PacketType.MAPINFO, OnMapInfo);
+            proxy.HookPacket<UpdatePacket>(OnUpdate);
+            proxy.HookPacket<NewTickPacket>(OnNewTick);
+            proxy.HookPacket<MapInfoPacket>(OnMapInfo);
 
             Log("Packets hooked");
         }
