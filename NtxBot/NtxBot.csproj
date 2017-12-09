@@ -48,6 +48,7 @@
     <Compile Include="AbyssBot.cs" />
     <Compile Include="ExtensionMethods_Client.cs" />
     <Compile Include="ExtensionMethods_Location.cs" />
+    <Compile Include="ExtensionMethods_Point.cs" />
     <Compile Include="FlashClient.cs" />
     <Compile Include="FormUI.cs">
       <SubType>Form</SubType>
