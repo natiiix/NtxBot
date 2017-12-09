@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbyssBot.cs" />
     <Compile Include="ExtensionMethods_Client.cs" />
     <Compile Include="FlashClient.cs" />
     <Compile Include="FormUI.cs">
@@ -55,6 +56,7 @@
     </Compile>
     <Compile Include="GameMap.cs" />
     <Compile Include="GameMapTile.cs" />
+    <Compile Include="MovementEngine.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Plugin_HelperMethods.cs" />
     <Compile Include="Plugin_PacketHanlders.cs" />

@@ -1,27 +1,17 @@
 ﻿using System;
+using System.Windows.Forms;
 
 namespace NtxBot
 {
     public class FlashClient
     {
-        private enum KeyCode : int
-        {
-            W = 0x57,
-            A = 0x41,
-            S = 0x53,
-            D = 0x44
-        }
-
-        private enum KeyEvent : uint
-        {
-            KeyDown = 0x0100,
-            KeyUp = 0x0101
-        }
+        private const uint WM_KEYDOWN = 0x0100;
+        private const uint WM_KEYUP = 0x0101;
 
         private class KeyWrapper
         {
             private bool pressed;
-            private Action<KeyEvent> sendKeyEventToFlash;
+            private Action<uint> sendKeyEventToFlash;
 
             public bool Pressed
             {
@@ -40,34 +30,66 @@ namespace NtxBot
                 }
             }
 
-            public KeyWrapper(Action<KeyEvent> sendKeyEventToFlash)
+            public KeyWrapper(Action<uint> sendKeyEventToFlash)
             {
                 pressed = false;
                 this.sendKeyEventToFlash = sendKeyEventToFlash;
             }
 
-            private KeyEvent KeyStateToEvent(bool state) => state ? KeyEvent.KeyDown : KeyEvent.KeyUp;
+            private uint KeyStateToEvent(bool state) => state ? WM_KEYDOWN : WM_KEYUP;
         }
 
-        private IntPtr ptr;
+        private const double MOVE_THRESHOLD = 0.25;
+
+        private IntPtr flashPtr;
         private KeyWrapper keyW;
         private KeyWrapper keyA;
         private KeyWrapper keyS;
         private KeyWrapper keyD;
 
-        public FlashClient(IntPtr flashPtr)
+        public FlashClient()
         {
-            ptr = flashPtr;
+            //flashPtr = GetFlashHandle();
+            flashPtr = WinApi.GetForegroundWindow();
 
-            keyW = new KeyWrapper(x => SendKeyEventToFlash(KeyCode.W, x));
-            keyA = new KeyWrapper(x => SendKeyEventToFlash(KeyCode.A, x));
-            keyS = new KeyWrapper(x => SendKeyEventToFlash(KeyCode.S, x));
-            keyD = new KeyWrapper(x => SendKeyEventToFlash(KeyCode.D, x));
+            keyW = new KeyWrapper(x => SendKeyEventToFlash(Keys.W, x));
+            keyA = new KeyWrapper(x => SendKeyEventToFlash(Keys.A, x));
+            keyS = new KeyWrapper(x => SendKeyEventToFlash(Keys.S, x));
+            keyD = new KeyWrapper(x => SendKeyEventToFlash(Keys.D, x));
         }
 
-        private void SendKeyEventToFlash(KeyCode keyCode, KeyEvent keyEvent)
+        public bool SetMovementDirection(double x, double y)
         {
-            WinApi.SendMessage(ptr, (uint)keyEvent, new IntPtr((int)keyCode), IntPtr.Zero);
+            // Up
+            keyW.Pressed = y < -MOVE_THRESHOLD;
+
+            // Left
+            keyA.Pressed = x < -MOVE_THRESHOLD;
+
+            // Down
+            keyS.Pressed = y > MOVE_THRESHOLD;
+
+            // Right
+            keyD.Pressed = x > MOVE_THRESHOLD;
+
+            return Math.Abs(x) > MOVE_THRESHOLD || Math.Abs(y) > MOVE_THRESHOLD;
         }
+
+        public void StopMovement()
+        {
+            keyW.Pressed = false;
+            keyA.Pressed = false;
+            keyS.Pressed = false;
+            keyD.Pressed = false;
+        }
+
+        private void SendKeyEventToFlash(Keys key, uint keyEvent)
+        {
+            WinApi.PostMessage(flashPtr, keyEvent, (IntPtr)key, IntPtr.Zero);
+        }
+
+        //private static bool IsFlashProcess(Process proc) => proc.ProcessName.ToLower().StartsWith("flashplayer");
+
+        //private static IntPtr GetFlashHandle() => Process.GetProcesses().Single(IsFlashProcess).MainWindowHandle;
     }
 }

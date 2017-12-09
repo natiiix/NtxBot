@@ -17,10 +17,6 @@ namespace NtxBot
         //private List<ushort> distinctTiles = new List<ushort>();
         //private List<ushort> distinctObjects = new List<ushort>();
 
-        private DateTime? dtLastTick = null;
-        private Location moveTarget = null;
-        private bool blockNextGotoAck = false;
-
         private void OnUpdate(Client client, Packet p)
         {
             UpdatePacket up = (UpdatePacket)p;
@@ -62,30 +58,6 @@ namespace NtxBot
             if (ntp == null) return;
 
             map?.ProcessPacket(ntp);
-
-            // Move player towards target location
-            if (dtLastTick == null || moveTarget == null)
-            {
-                dtLastTick = DateTime.Now;
-                return;
-            }
-
-            TimeSpan deltaTime = DateTime.Now - dtLastTick.Value;
-            dtLastTick = DateTime.Now;
-
-            MovePlayerTowardsTarget(client, ntp.TickId, deltaTime);
-        }
-
-        private void OnGotoAck(Client client, Packet p)
-        {
-            GotoAckPacket gackp = p as GotoAckPacket;
-            if (gackp == null) return;
-
-            if (blockNextGotoAck)
-            {
-                gackp.Send = false;
-                blockNextGotoAck = false;
-            }
         }
     }
 }

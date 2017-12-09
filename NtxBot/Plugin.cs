@@ -1,10 +1,6 @@
 ﻿using Lib_K_Relay;
 using Lib_K_Relay.Interface;
 using Lib_K_Relay.Networking.Packets;
-using Lib_K_Relay.Networking.Packets.DataObjects;
-using Lib_K_Relay.Utilities;
-using System.Linq;
-using System;
 
 namespace NtxBot
 {
@@ -23,15 +19,6 @@ namespace NtxBot
         public void Initialize(Proxy proxy)
         {
             ShowUI();
-
-            //proxy.HookCommand("distinct", (client, cmd, args) =>
-            //{
-            //    Log("---- TILES ----");
-            //    distinctTiles.ForEach(x => Log(ConvertTileTypeToString(x)));
-
-            //    Log("---- OBJECTS ----");
-            //    distinctObjects.ForEach(x => Log(ConvertObjectTypeToString(x)));
-            //});
 
             proxy.HookCommand("tileinfo", (client, cmd, args) =>
             {
@@ -75,7 +62,6 @@ namespace NtxBot
             proxy.HookPacket(PacketType.UPDATE, OnUpdate);
             proxy.HookPacket(PacketType.NEWTICK, OnNewTick);
             proxy.HookPacket(PacketType.MAPINFO, OnMapInfo);
-            proxy.HookPacket(PacketType.GOTOACK, OnGotoAck);
 
             Log("Packets hooked");
         }
