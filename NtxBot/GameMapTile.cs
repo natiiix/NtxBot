@@ -8,6 +8,9 @@ namespace NtxBot
     {
         private static readonly ushort TILE_PARTIAL_RED_FLOOR = GameData.Objects.ByName("Partial Red Floor").ID;
 
+        public int X { get; private set; }
+        public int Y { get; private set; }
+
         public ushort? TileType;
         public List<ushort> Objects;
 
@@ -16,8 +19,11 @@ namespace NtxBot
             get => (TileType != null && GameData.Tiles.ByID(TileType.Value).MaxDamage == 0) || Objects.Contains(TILE_PARTIAL_RED_FLOOR);
         }
 
-        public GameMapTile(ushort? type = null)
+        public GameMapTile(int x, int y, ushort? type = null)
         {
+            X = x;
+            Y = y;
+
             TileType = type;
             Objects = new List<ushort>();
         }

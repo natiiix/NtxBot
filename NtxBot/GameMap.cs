@@ -28,6 +28,16 @@ namespace NtxBot
             Height = mip.Height;
 
             Tiles = new GameMapTile[Width, Height];
+
+            // Initialize tiles to contain their coordinates
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    Tiles[x, y] = new GameMapTile(x, y);
+                }
+            }
+
             LivingEntities = new List<Entity>();
         }
 
