@@ -11,7 +11,7 @@ namespace NtxBot
         public static void TeleportToNexus(this Client client)
         {
             // Send an escape packet to the server
-            client.SendToServer(Packet.Create(PacketType.ESCAPE));
+            client.SendToServer(Packet.Create<EscapePacket>(PacketType.ESCAPE));
         }
 
         public static void SendChatMessage(this Client client, string text)
