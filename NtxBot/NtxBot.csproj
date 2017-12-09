@@ -59,6 +59,7 @@
     <Compile Include="Plugin_HelperMethods.cs" />
     <Compile Include="Plugin_PacketHanlders.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpatialAStar.cs" />
     <Compile Include="WinApi.cs" />
   </ItemGroup>
   <ItemGroup>
