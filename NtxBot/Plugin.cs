@@ -2,6 +2,7 @@
 using Lib_K_Relay.Interface;
 using Lib_K_Relay.Networking.Packets;
 using Lib_K_Relay.Networking.Packets.Server;
+using Lib_K_Relay.Networking.Packets.DataObjects;
 
 namespace NtxBot
 {
@@ -53,11 +54,21 @@ namespace NtxBot
                 map.LivingEntities.ForEach(x => Log(ConvertObjectTypeToString(x.ObjectType)));
             });
 
+            proxy.HookCommand("movesafely", (client, cmd, args) =>
+            {
+                new AbyssBot(client, map, new FlashClient()).MoveSafely(new Location(float.Parse(args[0]), float.Parse(args[1])));
+            });
+
             proxy.HookPacket<UpdatePacket>(OnUpdate);
             proxy.HookPacket<NewTickPacket>(OnNewTick);
             proxy.HookPacket<MapInfoPacket>(OnMapInfo);
 
             Log("Packets hooked");
+        }
+
+        private void Proxy_ClientConnected(Lib_K_Relay.Networking.Client client)
+        {
+            throw new System.NotImplementedException();
         }
 
         private void Log(string text) => ui?.AppendLog(text);
