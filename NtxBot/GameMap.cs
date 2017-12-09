@@ -18,7 +18,7 @@ namespace NtxBot
         public readonly int Width;
         public readonly int Height;
 
-        private GameMapTile[] tiles;
+        public GameMapTile[,] Tiles { get; private set; }
         public List<Entity> LivingEntities { get; private set; }
 
         public GameMap(MapInfoPacket mip)
@@ -27,19 +27,15 @@ namespace NtxBot
             Width = mip.Width;
             Height = mip.Height;
 
-            tiles = new GameMapTile[Height * Width];
+            Tiles = new GameMapTile[Width, Height];
             LivingEntities = new List<Entity>();
         }
 
-        private int CoordinatesToIndex(int x, int y) => (y * Width) + x;
-
         private bool AreValidCoordinates(int x, int y) => x >= 0 && x < Width && y >= 0 && y < Height;
-
-        public GameMapTile GetTile(int x, int y) => AreValidCoordinates(x, y) ? tiles[CoordinatesToIndex(x, y)] : null;
 
         public ushort? GetTileType(int x, int y)
         {
-            GameMapTile tile = GetTile(x, y);
+            GameMapTile tile = Tiles[x, y];
 
             if (tile == null)
             {
@@ -54,19 +50,16 @@ namespace NtxBot
             // Tiles
             foreach (Tile tile in p.Tiles)
             {
-                // Get the file index
-                int idx = CoordinatesToIndex(tile.X, tile.Y);
-
                 // Create the tile if it doesn't exist
-                if (tiles[idx] == null)
+                if (Tiles[tile.X, tile.Y] == null)
                 {
-                    tiles[idx] = new GameMapTile(tile.Type);
+                    Tiles[tile.X, tile.Y] = new GameMapTile(tile.Type);
                 }
-                // Tile exist
+                // Tile exists
                 // Modify the tile type
                 else
                 {
-                    tiles[idx].TileType = tile.Type;
+                    Tiles[tile.X, tile.Y].TileType = tile.Type;
                 }
             }
 
@@ -79,14 +72,12 @@ namespace NtxBot
                 // These objects are stored inside of the tiles on which they're standing
                 if (objStruct.MaxHP == 0 && objStruct.ObjectClass != "Pet")
                 {
-                    // Get the tile index
+                    // Get the tile coordinates
                     int x = (int)ent.Status.Position.X;
                     int y = (int)ent.Status.Position.Y;
 
-                    int idx = CoordinatesToIndex(x, y);
-
                     // Create a reference to the tile
-                    ref GameMapTile tile = ref tiles[idx];
+                    ref GameMapTile tile = ref Tiles[x, y];
 
                     // Create the tile if it's null
                     if (tile == null)
@@ -100,7 +91,7 @@ namespace NtxBot
                     // Add the object type to the tile if the tile doesn't contain it yet
                     if (!tile.Objects.Contains(type))
                     {
-                        tiles[idx].Objects.Add(type);
+                        Tiles[x, y].Objects.Add(type);
                     }
                 }
                 // Add new living entities to the list

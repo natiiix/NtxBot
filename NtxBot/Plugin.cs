@@ -29,7 +29,7 @@ namespace NtxBot
                     return;
                 }
 
-                GameMapTile tile = map.GetTile(int.Parse(args[0]), int.Parse(args[1]));
+                GameMapTile tile = map.Tiles[int.Parse(args[0]), int.Parse(args[1])];
 
                 if (tile == null)
                 {
