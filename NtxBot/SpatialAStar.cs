@@ -39,7 +39,7 @@ efficiently.
 using System;
 using System.Collections.Generic;
 
-namespace NtxBox
+namespace NtxBot
 {
     public interface IPathNode<TUserContext>
     {
