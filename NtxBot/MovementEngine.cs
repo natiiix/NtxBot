@@ -23,6 +23,8 @@ namespace NtxBot
         private Task movementTask;
         private Location targetLocation;
 
+        public bool Moving { get => movementTask != null && movementTask.Status != TaskStatus.RanToCompletion; }
+
         public MovementEngine(Client client, FlashClient flash)
         {
             this.client = client;
@@ -37,7 +39,7 @@ namespace NtxBot
             this.targetLocation = targetLocation;
 
             // Create a new task if there isn't one running now
-            if (movementTask == null || movementTask.Status == TaskStatus.RanToCompletion)
+            if (!Moving)
             {
                 movementTask?.Dispose();
                 movementTask = Task.Factory.StartNew(MoveToTarget);
