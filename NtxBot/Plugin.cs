@@ -31,21 +31,14 @@ namespace NtxBot
 
                 GameMapTile tile = map.Tiles[int.Parse(args[0]), int.Parse(args[1])];
 
-                if (tile == null)
-                {
-                    Log("Null tile!");
-                }
-                else
-                {
-                    // Tile type
-                    Log("Type: " + ConvertTileTypeToString(tile.TileType));
+                // Tile type
+                Log("Type: " + ConvertTileTypeToString(tile.TileType));
 
-                    // List of objects on that tile
-                    tile.Objects.ForEach(obj => Log(ConvertObjectTypeToString(obj)));
+                // List of objects on that tile
+                tile.Objects.ForEach(obj => Log(ConvertObjectTypeToString(obj)));
 
-                    // Information about tile's safety
-                    Log(tile.Safe ? "SAFE" : "UNSAFE");
-                }
+                // Information about tile's safety
+                Log(tile.Safe ? "SAFE" : "UNSAFE");
             });
 
             // Information about player's location

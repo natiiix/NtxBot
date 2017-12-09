@@ -33,35 +33,10 @@ namespace NtxBot
 
         private bool AreValidCoordinates(int x, int y) => x >= 0 && x < Width && y >= 0 && y < Height;
 
-        public ushort? GetTileType(int x, int y)
-        {
-            GameMapTile tile = Tiles[x, y];
-
-            if (tile == null)
-            {
-                return null;
-            }
-
-            return tile.TileType;
-        }
-
         public void ProcessPacket(UpdatePacket p)
         {
             // Tiles
-            foreach (Tile tile in p.Tiles)
-            {
-                // Create the tile if it doesn't exist
-                if (Tiles[tile.X, tile.Y] == null)
-                {
-                    Tiles[tile.X, tile.Y] = new GameMapTile(tile.Type);
-                }
-                // Tile exists
-                // Modify the tile type
-                else
-                {
-                    Tiles[tile.X, tile.Y].TileType = tile.Type;
-                }
-            }
+            p.Tiles.ForEach(x => Tiles[x.X, x.Y].TileType = x.Type);
 
             // New objects
             foreach (Entity ent in p.NewObjs)
@@ -78,12 +53,6 @@ namespace NtxBot
 
                     // Create a reference to the tile
                     ref GameMapTile tile = ref Tiles[x, y];
-
-                    // Create the tile if it's null
-                    if (tile == null)
-                    {
-                        tile = new GameMapTile();
-                    }
 
                     // Get the object type
                     ushort type = ent.ObjectType;
