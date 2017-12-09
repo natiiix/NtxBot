@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Lib_K_Relay.GameData;
 
 namespace NtxBot
 {
-    public class GameMapTile
+    public class GameMapTile : IPathNode<System.Object>
     {
         private static readonly ushort TILE_PARTIAL_RED_FLOOR = GameData.Objects.ByName("Partial Red Floor").ID;
 
@@ -24,5 +25,7 @@ namespace NtxBot
         {
             TileType = type;
         }
+
+        public bool IsWalkable(object inContext) => Safe;
     }
 }
