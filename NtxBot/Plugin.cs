@@ -22,15 +22,29 @@ namespace NtxBot
         {
             ShowUI();
 
+            // Information about a specified tile
             proxy.HookCommand("tileinfo", (client, cmd, args) =>
             {
-                if (args.Length != 2)
+                int x = 0;
+                int y = 0;
+
+                if (args.Length == 0)
                 {
-                    Log("Invalid arguments!");
+                    x = (int)client.PlayerData.Pos.X;
+                    y = (int)client.PlayerData.Pos.Y;
+                }
+                else if (args.Length == 2 && (!int.TryParse(args[0], out x) || !int.TryParse(args[1], out y)))
+                {
+                    Log("Invalid coordinates!");
+                    return;
+                }
+                else if (args.Length != 2)
+                {
+                    Log("Unexpected number of arguments!");
                     return;
                 }
 
-                Log(map.Tiles[int.Parse(args[0]), int.Parse(args[1])].ToString());
+                Log(map.Tiles[x, y].ToString());
             });
 
             // Information about player's location
