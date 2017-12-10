@@ -1,10 +1,13 @@
 ﻿using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets.Server;
+using Lib_K_Relay.Networking.Packets.Client;
 
 namespace NtxBot
 {
     public partial class Plugin
     {
+        public static bool blockNextGotoAck = false;
+
         private GameMap map;
 
         //private List<ushort> distinctTiles = new List<ushort>();
@@ -41,6 +44,15 @@ namespace NtxBot
 
             // Write the name of the map to the log
             Log("Current map: " + map.Name ?? "null");
+        }
+
+        private void OnGotoAck(Client client, GotoAckPacket p)
+        {
+            if (blockNextGotoAck)
+            {
+                p.Send = false;
+                blockNextGotoAck = false;
+            }
         }
     }
 }

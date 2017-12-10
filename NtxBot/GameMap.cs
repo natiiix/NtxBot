@@ -47,7 +47,7 @@ namespace NtxBot
 
                 // Objects with 0 maximum HP are immobile world elements
                 // These objects are stored inside of the tiles on which they're standing
-                if (objStruct.MaxHP == 0 && objStruct.ObjectClass != "Pet")
+                if (objStruct.OccupySquare || (objStruct.MaxHP == 0 && !objStruct.Pet))
                 {
                     // Get the tile coordinates
                     int x = (int)ent.Status.Position.X;

@@ -11,7 +11,7 @@ namespace NtxBot
 {
     public class MovementEngine
     {
-        private const double MOVEMENT_THRESHOLD_DISTANCE = 0.5;
+        private const double MOVEMENT_THRESHOLD_DISTANCE = 1;
         private static readonly TimeSpan TIMESPAN_RESTART_MOVEMENT = TimeSpan.FromSeconds(0.5);
 
         private Client client;
@@ -100,6 +100,13 @@ namespace NtxBot
 
             // Stop all movement
             flash.StopMovement();
+
+            // Jump to the exact target location to avoid getting stuck
+            if (!moveCTS.IsCancellationRequested)
+            {
+                client.Jump(target);
+                Thread.Sleep(100);
+            }
         }
 
         private IEnumerable<Point> FindShortestPath(Point target)

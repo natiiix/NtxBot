@@ -12,6 +12,7 @@ using Lib_K_Relay.Networking.Packets.DataObjects;
 using Lib_K_Relay;
 using Lib_K_Relay.Interface;
 using Lib_K_Relay.Networking.Packets.Server;
+using Lib_K_Relay.Networking.Packets.Client;
 
 namespace NtxBot
 {
@@ -76,6 +77,7 @@ namespace NtxBot
             proxy.HookPacket<UpdatePacket>(OnUpdate);
             proxy.HookPacket<NewTickPacket>(OnNewTick);
             proxy.HookPacket<MapInfoPacket>(OnMapInfo);
+            proxy.HookPacket<GotoAckPacket>(OnGotoAck);
 
             Log("Packets hooked");
         }
