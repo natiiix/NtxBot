@@ -1,73 +1,80 @@
 ﻿using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets.DataObjects;
 using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using Lib_K_Relay.GameData;
 
 namespace NtxBot
 {
     public class MovementEngine
     {
+        private const double MOVEMENT_THRESHOLD_DISTANCE = 0.5;
         private static readonly TimeSpan TIMESPAN_BETWEEN_ITERATIONS = TimeSpan.FromSeconds(0.05);
         private static readonly TimeSpan TIMESPAN_RESTART_MOVEMENT = TimeSpan.FromSeconds(0.5);
 
         private Client client;
         private FlashClient flash;
-        private Task movementTask;
-        private Location targetLocation;
+        private GameMap map;
 
-        public bool Moving { get => movementTask != null && movementTask.Status != TaskStatus.RanToCompletion; }
+        private Task moveTask;
+        private CancellationTokenSource moveCTS;
 
-        public MovementEngine(Client client, FlashClient flash)
+        public bool Moving { get => moveTask != null && moveTask.Status == TaskStatus.Running; }
+
+        public MovementEngine(Client client, FlashClient flash, GameMap map)
         {
             this.client = client;
             this.flash = flash;
+            this.map = map;
 
-            movementTask = null;
-            targetLocation = null;
+            moveTask = null;
         }
 
-        public void Move(Location targetLocation)
+        public void BeginComplexMove(Location target)
         {
-            this.targetLocation = targetLocation;
-
+            // Cancel the previous movement task if there was any
             if (Moving)
             {
-                throw new Exception("Unable to start moving synchronously while moving asynchronously!");
+                moveCTS.Cancel();
+                moveTask.Wait();
             }
 
-            MoveToTargetAsync();
-        }
-
-        public void BeginMove(Location targetLocation)
-        {
-            this.targetLocation = targetLocation;
-
-            // Create a new task if there isn't one running now
-            if (!Moving)
+            // Create a new movement task
+            moveCTS = new CancellationTokenSource();
+            moveTask = Task.Factory.StartNew(() =>
             {
-                movementTask?.Dispose();
-                movementTask = Task.Factory.StartNew(MoveToTargetAsync);
-            }
+                // Move along the path
+                FindShortestSafePath(target).ForEach(x =>
+                {
+                    if (moveCTS.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    MoveDirectlyToTarget(x);
+                });
+            }, moveCTS.Token);
         }
 
-        public void StopMovement()
-        {
-            targetLocation = null;
-        }
+        public void CancelMovement() => moveCTS.Cancel();
 
-        private async void MoveToTargetAsync()
+        private async void MoveDirectlyToTarget(Location target)
         {
             // Get the current time and player position
             Location lastPlayerPos = client.PlayerData.Pos;
             DateTime dtLastMove = DateTime.Now;
 
             // Move towards the target location
-            // Loop breaks when the target location is reached or when the client connection drops
-            while (targetLocation != null && client.Connected &&
-                flash.SetMovementDirection(targetLocation.X - client.PlayerData.Pos.X, targetLocation.Y - client.PlayerData.Pos.Y, 0.5))
+            // Loop breaks when the target location is reached, when a task
+            // cancellation is requested or when the client connection drops
+            while (client.Connected && !moveCTS.IsCancellationRequested &&
+                flash.SetMovementDirection(target.X - client.PlayerData.Pos.X, target.Y - client.PlayerData.Pos.Y, MOVEMENT_THRESHOLD_DISTANCE))
             {
                 // Add some delay between the iterations
-                await Task.Delay(TIMESPAN_BETWEEN_ITERATIONS);
+                await Task.Delay(TIMESPAN_BETWEEN_ITERATIONS, moveCTS.Token);
 
                 // Player has moved since the last iteration
                 if (lastPlayerPos.X != client.PlayerData.Pos.X || lastPlayerPos.Y != client.PlayerData.Pos.Y)
@@ -86,9 +93,14 @@ namespace NtxBot
 
             // Stop all movement
             flash.StopMovement();
+        }
 
-            // Reset the target location
-            targetLocation = null;
+        private IEnumerable<Location> FindShortestSafePath(Location target)
+        {
+            return new SpatialAStar<GameMapTile, object>(map.Tiles).Search(client.PlayerData.Pos.ToPoint(), target.ToPoint(), null)
+                // Construct a location from the tile coordinates
+                // Make it point to the center of the tile rather than the top-left corner
+                .Select(x => new Location(x.X + 0.5f, x.Y + 0.5f));
         }
     }
 }
