@@ -1,8 +1,19 @@
-﻿using Lib_K_Relay;
+﻿/*
+using Lib_K_Relay;
+using Lib_K_Relay.Utilities;
 using Lib_K_Relay.Interface;
+using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets;
+using Lib_K_Relay.Networking.Packets.Client;
 using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.DataObjects;
+*/
+
+using Lib_K_Relay;
+using Lib_K_Relay.Interface;
+using Lib_K_Relay.Networking.Packets.DataObjects;
+using Lib_K_Relay.Networking.Packets.Server;
+using System.Threading.Tasks;
 
 namespace NtxBot
 {
@@ -61,7 +72,7 @@ namespace NtxBot
 
             proxy.HookCommand("movesafely", (client, cmd, args) =>
             {
-                System.Threading.Tasks.Task.Factory.StartNew(() => new AbyssBot(client, map, new FlashClient()).MoveSafely(new Location(float.Parse(args[0]), float.Parse(args[1]))));
+                Task.Factory.StartNew(() => new AbyssBot(client, map, new FlashClient()).MoveSafely(new Location(float.Parse(args[0]), float.Parse(args[1]))));
             });
 
             proxy.HookPacket<UpdatePacket>(OnUpdate);

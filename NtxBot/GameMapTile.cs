@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using Lib_K_Relay.GameData;
+﻿using Lib_K_Relay.GameData;
 using Lib_K_Relay.GameData.DataStructures;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NtxBot
 {
