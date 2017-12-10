@@ -35,8 +35,6 @@ namespace NtxBot
             LivingEntities = new List<Entity>();
         }
 
-        private bool AreValidCoordinates(int x, int y) => x >= 0 && x < Width && y >= 0 && y < Height;
-
         public void ProcessPacket(UpdatePacket p)
         {
             // Tiles

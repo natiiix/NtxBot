@@ -35,5 +35,7 @@ namespace NtxBot
             // The notification will be displayed on top of the character's head
             client.SendToClient(PluginUtils.CreateNotification(client.ObjectId, text));
         }
+
+        public static Point GetPlayerLocationAsPoint(this Client client) => (Point)client.PlayerData.Pos;
     }
 }
