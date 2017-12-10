@@ -34,6 +34,18 @@ namespace NtxBot
             targetLocation = null;
         }
 
+        public void Move(Location targetLocation)
+        {
+            this.targetLocation = targetLocation;
+
+            if (Moving)
+            {
+                throw new Exception("Unable to start moving synchronously while moving asynchronously!");
+            }
+
+            MoveToTarget();
+        }
+
         public void BeginMove(Location targetLocation)
         {
             this.targetLocation = targetLocation;
@@ -65,7 +77,7 @@ namespace NtxBot
                     targetLocation.Y - client.PlayerData.Pos.Y))
             {
                 // Add some delay between the iterations
-                Thread.Sleep(100);
+                Thread.Sleep(MILLISECONDS_BETWEEN_ITERATIONS);
 
                 // Player has moved since the last iteration
                 if (lastPlayerPos.X != client.PlayerData.Pos.X || lastPlayerPos.Y != client.PlayerData.Pos.Y)
@@ -84,6 +96,9 @@ namespace NtxBot
 
             // Stop all movement
             flash.StopMovement();
+
+            // Reset the target location
+            targetLocation = null;
         }
     }
 }

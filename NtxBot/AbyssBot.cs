@@ -46,6 +46,8 @@ namespace NtxBot
                     Thread.Sleep(100);
                 }
                 while (me.Moving);
+
+                PluginUtils.Log("Abyss Bot", "Movement stopped!");
             });
 
             PluginUtils.Log("Abyss Bot", "Done moving!");
