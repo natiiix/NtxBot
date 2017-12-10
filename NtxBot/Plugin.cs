@@ -10,6 +10,7 @@ using Lib_K_Relay.Networking.Packets.DataObjects;
 */
 
 using Lib_K_Relay;
+using Lib_K_Relay.GameData;
 using Lib_K_Relay.Interface;
 using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.Client;
@@ -66,7 +67,7 @@ namespace NtxBot
             // Information about living entities on the current map
             proxy.HookCommand("living", (client, cmd, args) =>
             {
-                map.LivingEntities.ForEach(x => Log(ConvertObjectTypeToString(x.ObjectType)));
+                map.LivingEntities.ForEach(x => Log(x.ObjectType.ToString() + " - " + GameData.Objects.ByID(x.ObjectType).Name));
             });
 
             proxy.HookCommand("goto", (client, cmd, args) =>

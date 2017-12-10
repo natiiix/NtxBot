@@ -101,11 +101,34 @@ namespace NtxBot
             // Stop all movement
             flash.StopMovement();
 
-            // Jump to the exact target location to avoid getting stuck
             if (!moveCTS.IsCancellationRequested)
             {
-                client.Jump(target);
-                Thread.Sleep(100);
+                // Only jump if it's possible for the player to get stuck
+                Point playerPos = client.GetPlayerLocationAsPoint();
+
+                // Get all the surrounding tiles
+                List<GameMapTile> surroundingTiles = new List<GameMapTile>();
+
+                for (int y = (playerPos.Y > 0 ? -1 : 0); y <= (playerPos.Y < map.Height - 1 ? 1 : 0); y++)
+                {
+                    for (int x = (playerPos.X > 0 ? -1 : 0); x <= (playerPos.X < map.Width - 1 ? 1 : 0); x++)
+                    {
+                        if (y == 0 && x == 0)
+                        {
+                            continue;
+                        }
+
+                        surroundingTiles.Add(map.Tiles[playerPos.X + x, playerPos.Y + y]);
+                    }
+                }
+
+                // If one of the surrounding tiles is unwalkable
+                if (surroundingTiles.Exists(x => !x.Walkable))
+                {
+                    // Jump to the exact target location to avoid getting stuck
+                    client.Jump(target);
+                    Thread.Sleep(200);
+                }
             }
         }
 

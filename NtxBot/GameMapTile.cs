@@ -73,7 +73,7 @@ namespace NtxBot
         {
             return string.Format("X={0} Y={1} Walkable={2} Type={3} Objects={4}",
                 Location.X, Location.Y, Walkable,
-                "{" + tileStruct.Value.ID.ToString() + " - " + tileStruct.Value.Name + "}",
+                tileStruct.HasValue ? ("{" + tileStruct.Value.ID.ToString() + " - " + tileStruct.Value.Name + "}") : "NULL",
                 "[" + string.Join(", ", objStructs.Select(x => "{" + x.ID + " - " + x.Name + "}")) + "]");
         }
     }
