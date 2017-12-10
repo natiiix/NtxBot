@@ -47,8 +47,6 @@
   <ItemGroup>
     <Compile Include="AbyssBot.cs" />
     <Compile Include="ExtensionMethods_Client.cs" />
-    <Compile Include="ExtensionMethods_Location.cs" />
-    <Compile Include="ExtensionMethods_Point.cs" />
     <Compile Include="FlashClient.cs" />
     <Compile Include="FormUI.cs">
       <SubType>Form</SubType>
@@ -62,6 +60,7 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Plugin_HelperMethods.cs" />
     <Compile Include="Plugin_PacketHanlders.cs" />
+    <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpatialAStar.cs" />
     <Compile Include="WinApi.cs" />

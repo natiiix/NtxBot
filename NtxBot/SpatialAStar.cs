@@ -41,9 +41,9 @@ using System.Collections.Generic;
 
 namespace NtxBot
 {
-    public interface IPathNode<TUserContext>
+    public interface IPathNode
     {
-        Boolean IsWalkable(TUserContext inContext);
+        bool Walkable { get; }
     }
 
     public interface IIndexedObject
@@ -54,7 +54,7 @@ namespace NtxBot
     /// <summary>
     /// Uses about 50 MB for a 1024x1024 grid.
     /// </summary>
-    public class SpatialAStar<TPathNode, TUserContext> where TPathNode : IPathNode<TUserContext>
+    public class SpatialAStar<TPathNode> where TPathNode : IPathNode
     {
         private class PriorityQueue<T> where T : IIndexedObject
         {
@@ -206,7 +206,7 @@ namespace NtxBot
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        protected class PathNode : IPathNode<TUserContext>, IComparer<PathNode>, IIndexedObject
+        protected class PathNode : IPathNode, IComparer<PathNode>, IIndexedObject
         {
             public static readonly PathNode Comparer = new PathNode(0, 0, default(TPathNode));
 
@@ -216,10 +216,7 @@ namespace NtxBot
             public Double F { get; internal set; }
             public int Index { get; set; }
 
-            public Boolean IsWalkable(TUserContext inContext)
-            {
-                return UserContext.IsWalkable(inContext);
-            }
+            public bool Walkable { get => UserContext.Walkable; }
 
             public int X { get; internal set; }
             public int Y { get; internal set; }
@@ -294,7 +291,7 @@ namespace NtxBot
         /// Returns null, if no path is found. Start- and End-Node are included in returned path. The user context
         /// is passed to IsWalkable().
         /// </summary>
-        public LinkedList<TPathNode> Search(System.Drawing.Point inStartNode, System.Drawing.Point inEndNode, TUserContext inUserContext)
+        public LinkedList<TPathNode> Search(Point inStartNode, Point inEndNode)
         {
             PathNode startNode = m_SearchSpace[inStartNode.X, inStartNode.Y];
             PathNode endNode = m_SearchSpace[inEndNode.X, inEndNode.Y];
@@ -361,7 +358,7 @@ namespace NtxBot
                     if (y == null)
                         continue;
 
-                    if (!y.UserContext.IsWalkable(inUserContext))
+                    if (!y.UserContext.Walkable)
                         continue;
 
                     if (m_ClosedSet.Contains(y))

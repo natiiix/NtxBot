@@ -72,7 +72,7 @@ namespace NtxBot
 
             proxy.HookCommand("goto", (client, cmd, args) =>
             {
-                new MovementEngine(client, new FlashClient(), map).BeginComplexMove(new Location(float.Parse(args[0]), float.Parse(args[1])));
+                new MovementEngine(client, new FlashClient(), map).BeginMove(new Point(int.Parse(args[0]), int.Parse(args[1])));
             });
 
             proxy.HookPacket<UpdatePacket>(OnUpdate);

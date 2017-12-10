@@ -33,7 +33,7 @@ namespace NtxBot
             moveTask = null;
         }
 
-        public void BeginComplexMove(Location target)
+        public void BeginMove(Point target)
         {
             // Cancel the previous movement task if there was any
             if (Moving)
@@ -46,8 +46,10 @@ namespace NtxBot
             moveCTS = new CancellationTokenSource();
             moveTask = Task.Factory.StartNew(() =>
             {
+                IEnumerable<Location> shortestPath = FindShortestPath(target);
+
                 // Move along the path
-                FindShortestSafePath(target).ForEach(x =>
+                shortestPath.ForEach(x =>
                 {
                     if (moveCTS.IsCancellationRequested)
                     {
@@ -59,7 +61,7 @@ namespace NtxBot
             }, moveCTS.Token);
         }
 
-        public void CancelMovement() => moveCTS.Cancel();
+        public void CancelMove() => moveCTS.Cancel();
 
         private async void MoveDirectlyToTarget(Location target)
         {
@@ -95,9 +97,9 @@ namespace NtxBot
             flash.StopMovement();
         }
 
-        private IEnumerable<Location> FindShortestSafePath(Location target)
+        private IEnumerable<Location> FindShortestPath(Point target)
         {
-            return new SpatialAStar<GameMapTile, object>(map.Tiles).Search(client.PlayerData.Pos.ToPoint(), target.ToPoint(), null)
+            return new SpatialAStar<GameMapTile>(map.Tiles).Search((Point)client.PlayerData.Pos, target)
                 // Construct a location from the tile coordinates
                 // Make it point to the center of the tile rather than the top-left corner
                 .Select(x => new Location(x.X + 0.5f, x.Y + 0.5f));

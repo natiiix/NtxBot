@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace NtxBot
 {
-    public class GameMapTile : IPathNode<Object>
+    public class GameMapTile : IPathNode
     {
         public int X { get; private set; }
         public int Y { get; private set; }
@@ -41,8 +41,6 @@ namespace NtxBot
                 EvaluateWalkableProperty();
             }
         }
-
-        public bool IsWalkable(object inContext) => Walkable;
 
         private void EvaluateWalkableProperty()
         {
