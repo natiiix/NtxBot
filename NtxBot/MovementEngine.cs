@@ -1,11 +1,11 @@
-﻿using Lib_K_Relay.Networking;
+﻿using Lib_K_Relay.GameData;
+using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets.DataObjects;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
-using Lib_K_Relay.GameData;
 
 namespace NtxBot
 {
