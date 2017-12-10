@@ -15,7 +15,7 @@ namespace NtxBot
 {
     public class MovementEngine
     {
-        private const int MILLISECONDS_BETWEEN_ITERATIONS = 100;
+        private static readonly TimeSpan TIMESPAN_BETWEEN_ITERATIONS = TimeSpan.FromSeconds(0.05);
         private static readonly TimeSpan TIMESPAN_RESTART_MOVEMENT = TimeSpan.FromSeconds(0.5);
 
         private Client client;
@@ -43,7 +43,7 @@ namespace NtxBot
                 throw new Exception("Unable to start moving synchronously while moving asynchronously!");
             }
 
-            MoveToTarget();
+            MoveToTargetAsync();
         }
 
         public void BeginMove(Location targetLocation)
@@ -54,7 +54,7 @@ namespace NtxBot
             if (!Moving)
             {
                 movementTask?.Dispose();
-                movementTask = Task.Factory.StartNew(MoveToTarget);
+                movementTask = Task.Factory.StartNew(MoveToTargetAsync);
             }
         }
 
@@ -63,7 +63,7 @@ namespace NtxBot
             targetLocation = null;
         }
 
-        private void MoveToTarget()
+        private async void MoveToTargetAsync()
         {
             // Get the current time and player position
             Location lastPlayerPos = client.PlayerData.Pos;
@@ -77,7 +77,7 @@ namespace NtxBot
                     targetLocation.Y - client.PlayerData.Pos.Y))
             {
                 // Add some delay between the iterations
-                Thread.Sleep(MILLISECONDS_BETWEEN_ITERATIONS);
+                await Task.Delay(TIMESPAN_BETWEEN_ITERATIONS);
 
                 // Player has moved since the last iteration
                 if (lastPlayerPos.X != client.PlayerData.Pos.X || lastPlayerPos.Y != client.PlayerData.Pos.Y)

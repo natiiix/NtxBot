@@ -39,7 +39,7 @@ namespace NtxBot
             private uint KeyStateToEvent(bool state) => state ? WM_KEYDOWN : WM_KEYUP;
         }
 
-        private const double MOVE_THRESHOLD = 0.25;
+        private const double MOVE_THRESHOLD = 0.5;
 
         private IntPtr flashPtr;
         private KeyWrapper keyW;
@@ -72,6 +72,7 @@ namespace NtxBot
             // Right
             keyD.Pressed = x > MOVE_THRESHOLD;
 
+            // Returns true if the character is going to move, returns false if it's going to be stationary
             return Math.Abs(x) > MOVE_THRESHOLD || Math.Abs(y) > MOVE_THRESHOLD;
         }
 

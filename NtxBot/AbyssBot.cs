@@ -39,18 +39,8 @@ namespace NtxBot
 
             FindShortestSafePath(target).ForEach(x =>
             {
-                me.BeginMove(x);
-
-                do
-                {
-                    Thread.Sleep(100);
-                }
-                while (me.Moving);
-
-                PluginUtils.Log("Abyss Bot", "Movement stopped!");
+                me.Move(x);
             });
-
-            PluginUtils.Log("Abyss Bot", "Done moving!");
         }
 
         private IEnumerable<Location> FindShortestSafePath(Location target)

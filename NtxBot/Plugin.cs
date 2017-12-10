@@ -56,7 +56,7 @@ namespace NtxBot
 
             proxy.HookCommand("movesafely", (client, cmd, args) =>
             {
-                new AbyssBot(client, map, new FlashClient()).MoveSafely(new Location(float.Parse(args[0]), float.Parse(args[1])));
+                System.Threading.Tasks.Task.Factory.StartNew(() => new AbyssBot(client, map, new FlashClient()).MoveSafely(new Location(float.Parse(args[0]), float.Parse(args[1]))));
             });
 
             proxy.HookPacket<UpdatePacket>(OnUpdate);
