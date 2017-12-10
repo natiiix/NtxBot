@@ -70,7 +70,7 @@ namespace NtxBot
                 map.LivingEntities.ForEach(x => Log(ConvertObjectTypeToString(x.ObjectType)));
             });
 
-            proxy.HookCommand("movesafely", (client, cmd, args) =>
+            proxy.HookCommand("goto", (client, cmd, args) =>
             {
                 Task.Factory.StartNew(() => new AbyssBot(client, map, new FlashClient()).MoveSafely(new Location(float.Parse(args[0]), float.Parse(args[1]))));
             });
