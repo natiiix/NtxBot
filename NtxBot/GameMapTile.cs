@@ -38,6 +38,7 @@ namespace NtxBot
             if (!objStructs.Contains(objStruct))
             {
                 objStructs.Add(objStruct);
+                EvaluateWalkableProperty();
             }
         }
 
@@ -75,7 +76,7 @@ namespace NtxBot
             return string.Format("X={0} Y={1} Walkable={2} Type={3} Objects={4}",
                 X, Y, Walkable,
                 "{" + tileStruct.Value.ID.ToString() + " - " + tileStruct.Value.Name + "}",
-                "{" + string.Join(", ", objStructs.Select(x => "[" + x.ID + " - " + x.Name + "]")) + "}");
+                "[" + string.Join(", ", objStructs.Select(x => "{" + x.ID + " - " + x.Name + "}")) + "]");
         }
     }
 }
