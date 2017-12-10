@@ -17,7 +17,7 @@ namespace NtxBot
 {
     public partial class Plugin : IPlugin
     {
-        private FormUI ui;
+        private static FormUI ui;
 
         public string GetAuthor() => "natiiix";
 

@@ -61,6 +61,11 @@ namespace NtxBot
 
                     MoveDirectlyToTarget(x);
                 });
+
+                if (!moveCTS.IsCancellationRequested)
+                {
+                    Plugin.Log("Arrived at the destination!");
+                }
             }, moveCTS.Token);
         }
 
@@ -99,7 +104,7 @@ namespace NtxBot
 
         private IEnumerable<Point> FindShortestPath(Point target)
         {
-            return new SpatialAStar<GameMapTile>(map.Tiles).Search((Point)client.PlayerData.Pos, target).Select(x => x.Location);
+            return new SpatialAStar<GameMapTile>(map.Tiles).Search(client.GetPlayerLocationAsPoint(), target).Select(x => x.Location);
         }
 
         // Removes unnecessary nodes from the path
