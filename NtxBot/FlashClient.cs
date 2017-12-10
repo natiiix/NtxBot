@@ -39,8 +39,6 @@ namespace NtxBot
             private uint KeyStateToEvent(bool state) => state ? WM_KEYDOWN : WM_KEYUP;
         }
 
-        private const double MOVE_THRESHOLD = 0.5;
-
         private IntPtr flashPtr;
         private KeyWrapper keyW;
         private KeyWrapper keyA;
@@ -58,22 +56,27 @@ namespace NtxBot
             keyD = new KeyWrapper(x => SendKeyEventToFlash(Keys.D, x));
         }
 
-        public bool SetMovementDirection(double x, double y)
+        public bool SetMovementDirection(double x, double y, double threshold)
         {
+            if (threshold < 0)
+            {
+                throw new ArgumentException("Threshold must not be a negative value.");
+            }
+
             // Up
-            keyW.Pressed = y < -MOVE_THRESHOLD;
+            keyW.Pressed = y < -threshold;
 
             // Left
-            keyA.Pressed = x < -MOVE_THRESHOLD;
+            keyA.Pressed = x < -threshold;
 
             // Down
-            keyS.Pressed = y > MOVE_THRESHOLD;
+            keyS.Pressed = y > threshold;
 
             // Right
-            keyD.Pressed = x > MOVE_THRESHOLD;
+            keyD.Pressed = x > threshold;
 
             // Returns true if the character is going to move, returns false if it's going to be stationary
-            return Math.Abs(x) > MOVE_THRESHOLD || Math.Abs(y) > MOVE_THRESHOLD;
+            return Math.Abs(x) > threshold || Math.Abs(y) > threshold;
         }
 
         public void StopMovement()

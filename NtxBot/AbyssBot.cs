@@ -45,7 +45,10 @@ namespace NtxBot
 
         private IEnumerable<Location> FindShortestSafePath(Location target)
         {
-            return new SpatialAStar<GameMapTile, object>(map.Tiles).Search(client.PlayerData.Pos.ToPoint(), target.ToPoint(), null).Select(x => new Location(x.X, x.Y));
+            return new SpatialAStar<GameMapTile, object>(map.Tiles).Search(client.PlayerData.Pos.ToPoint(), target.ToPoint(), null)
+                // Construct a location from the tile coordinates
+                // Make it point to the center of the tile rather than the top-left corner
+                .Select(x => new Location(x.X + 0.5f, x.Y + 0.5f));
         }
     }
 }

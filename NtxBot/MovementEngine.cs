@@ -72,9 +72,7 @@ namespace NtxBot
             // Move towards the target location
             // Loop breaks when the target location is reached or when the client connection drops
             while (targetLocation != null && client.Connected &&
-                flash.SetMovementDirection(
-                    targetLocation.X - client.PlayerData.Pos.X,
-                    targetLocation.Y - client.PlayerData.Pos.Y))
+                flash.SetMovementDirection(targetLocation.X - client.PlayerData.Pos.X, targetLocation.Y - client.PlayerData.Pos.Y, 0.5))
             {
                 // Add some delay between the iterations
                 await Task.Delay(TIMESPAN_BETWEEN_ITERATIONS);
