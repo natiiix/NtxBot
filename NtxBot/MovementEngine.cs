@@ -34,6 +34,10 @@ namespace NtxBot
 
         public void BeginMove(Point target)
         {
+            // TODO: There is a problem that when the player is standing the the middle of Nexus
+            // the /goto command will do nothing. No movement will happen as a result of the command.
+            // As of right now it's not known what could be possibly causing this strage misbehavior.
+
             // Cancel the previous movement task if there was any
             if (Moving)
             {
