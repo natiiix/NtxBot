@@ -30,16 +30,7 @@ namespace NtxBot
                     return;
                 }
 
-                GameMapTile tile = map.Tiles[int.Parse(args[0]), int.Parse(args[1])];
-
-                // Tile type
-                Log("Type: " + ConvertTileTypeToString(tile.TileType));
-
-                // List of objects on that tile
-                tile.Objects.ForEach(obj => Log(ConvertObjectTypeToString(obj)));
-
-                // Information about tile's safety
-                Log(tile.Safe ? "SAFE" : "UNSAFE");
+                Log(map.Tiles[int.Parse(args[0]), int.Parse(args[1])].ToString());
             });
 
             // Information about player's location

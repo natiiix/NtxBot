@@ -9,6 +9,7 @@ using Lib_K_Relay.Networking.Packets;
 using Lib_K_Relay.Networking.Packets.DataObjects;
 using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.Client;
+using Lib_K_Relay.GameData.DataStructures;
 
 namespace NtxBot
 {
@@ -46,12 +47,12 @@ namespace NtxBot
         public void ProcessPacket(UpdatePacket p)
         {
             // Tiles
-            p.Tiles.ForEach(x => Tiles[x.X, x.Y].TileType = x.Type);
+            p.Tiles.ForEach(x => Tiles[x.X, x.Y].SetTile(x.Type));
 
             // New objects
             foreach (Entity ent in p.NewObjs)
             {
-                Lib_K_Relay.GameData.DataStructures.ObjectStructure objStruct = GameData.Objects.ByID(ent.ObjectType);
+                ObjectStructure objStruct = GameData.Objects.ByID(ent.ObjectType);
 
                 // Objects with 0 maximum HP are immobile world elements
                 // These objects are stored inside of the tiles on which they're standing
@@ -61,17 +62,8 @@ namespace NtxBot
                     int x = (int)ent.Status.Position.X;
                     int y = (int)ent.Status.Position.Y;
 
-                    // Create a reference to the tile
-                    ref GameMapTile tile = ref Tiles[x, y];
-
-                    // Get the object type
-                    ushort type = ent.ObjectType;
-
-                    // Add the object type to the tile if the tile doesn't contain it yet
-                    if (!tile.Objects.Contains(type))
-                    {
-                        Tiles[x, y].Objects.Add(type);
-                    }
+                    // Add the object to the tile
+                    Tiles[x, y].AddObject(objStruct);
                 }
                 // Add new living entities to the list
                 else
