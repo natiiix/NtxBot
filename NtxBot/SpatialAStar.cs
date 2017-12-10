@@ -265,7 +265,7 @@ namespace NtxBot
 
         protected virtual Double Heuristic(PathNode inStart, PathNode inEnd)
         {
-            return Math.Sqrt((inStart.X - inEnd.X) * (inStart.X - inEnd.X) + (inStart.Y - inEnd.Y) * (inStart.Y - inEnd.Y));
+            return Math.Sqrt(Math.Pow(inStart.X - inEnd.X, 2) + Math.Pow(inStart.Y - inEnd.Y, 2));
         }
 
         private static readonly Double SQRT_2 = Math.Sqrt(2);
@@ -284,8 +284,6 @@ namespace NtxBot
                     throw new ApplicationException();
             }
         }
-
-        //private List<Int64> elapsed = new List<long>();
 
         /// <summary>
         /// Returns null, if no path is found. Start- and End-Node are included in returned path. The user context

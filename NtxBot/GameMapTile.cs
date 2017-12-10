@@ -7,20 +7,21 @@ namespace NtxBot
 {
     public class GameMapTile : IPathNode
     {
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        public Point Location { get; private set; }
 
         public bool Walkable { get; private set; }
 
         private TileStructure? tileStruct = null;
         private List<ObjectStructure> objStructs = new List<ObjectStructure>();
 
-        public GameMapTile(int x, int y)
+        public GameMapTile(Point location)
         {
-            X = x;
-            Y = y;
+            Location = location;
+            Walkable = false;
+        }
 
-            EvaluateWalkableProperty();
+        public GameMapTile(int x, int y) : this(new Point(x, y))
+        {
         }
 
         public void SetTile(ushort tileType)
@@ -71,7 +72,7 @@ namespace NtxBot
         public override string ToString()
         {
             return string.Format("X={0} Y={1} Walkable={2} Type={3} Objects={4}",
-                X, Y, Walkable,
+                Location.X, Location.Y, Walkable,
                 "{" + tileStruct.Value.ID.ToString() + " - " + tileStruct.Value.Name + "}",
                 "[" + string.Join(", ", objStructs.Select(x => "{" + x.ID + " - " + x.Name + "}")) + "]");
         }

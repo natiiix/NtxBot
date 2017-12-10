@@ -19,5 +19,10 @@ namespace NtxBot
         {
             // TODO
         }
+
+        //private Point FindCoveredPath()
+        //{
+        //    Point playerPos = client.GetPlayerLocationAsPoint();
+        //}
     }
 }
