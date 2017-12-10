@@ -79,22 +79,5 @@ namespace NtxBot
 
             Log("Packets hooked");
         }
-
-        private void Proxy_ClientConnected(Lib_K_Relay.Networking.Client client)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        private void Log(string text) => ui?.AppendLog(text);
-
-        private void ShowUI()
-        {
-            if (ui == null)
-            {
-                ui = new FormUI();
-                ui.Show();
-                //PluginUtils.ShowGUI(ui);
-            }
-        }
     }
 }

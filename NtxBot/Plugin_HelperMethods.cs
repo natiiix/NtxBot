@@ -60,6 +60,18 @@ namespace NtxBot
         //    client.SendToClient(gp);
         //}
 
+        private void Log(string text) => ui?.AppendLog(text);
+
+        private void ShowUI()
+        {
+            if (ui == null)
+            {
+                ui = new FormUI();
+                ui.Show();
+                //PluginUtils.ShowGUI(ui);
+            }
+        }
+
         private static string ConvertTileTypeToString(ushort? tileType) => tileType == null ? "null" : tileType.ToString() + " - " + GameData.Tiles.ByID(tileType.Value).Name;
 
         private static string ConvertObjectTypeToString(ushort objectType) => objectType.ToString() + " - " + GameData.Objects.ByID(objectType).Name;
