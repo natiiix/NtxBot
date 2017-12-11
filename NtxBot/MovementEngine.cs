@@ -34,9 +34,12 @@ namespace NtxBot
 
         public void BeginMove(Point target)
         {
-            // TODO: There is a problem that when the player is standing the the middle of Nexus
-            // the /goto command will do nothing. No movement will happen as a result of the command.
-            // As of right now it's not known what could be possibly causing this strage misbehavior.
+            // It's impossible to find a path that leads to an unwalkable tile
+            if (!map.Tiles[target.X, target.Y].Walkable)
+            {
+                Plugin.Log("Destination tile is not walkable!");
+                return;
+            }
 
             // Cancel the previous movement task if there was any
             if (Moving)
@@ -50,10 +53,17 @@ namespace NtxBot
             moveTask = Task.Factory.StartNew(() =>
             {
                 // Find the shortest path and simplify it
-                IEnumerable<Point> path = SimplifyPath(FindShortestPath(target));
+                IEnumerable<Point> shortestPath = FindShortestPath(target);
+
+                // Abort if no path is found
+                if (shortestPath == null || shortestPath.Count() == 0)
+                {
+                    Plugin.Log("Unable to find a path to the destination!");
+                    return;
+                }
 
                 // Convert points to locations pointing to the center of the tile rather than the top-left corner
-                IEnumerable<Location> converted = path.Select(x => new Location(x.X + 0.5f, x.Y + 0.5f));
+                IEnumerable<Location> converted = SimplifyPath(shortestPath).Select(x => new Location(x.X + 0.5f, x.Y + 0.5f));
 
                 // Move along the path
                 converted.ForEach(x =>
@@ -138,12 +148,18 @@ namespace NtxBot
 
         private IEnumerable<Point> FindShortestPath(Point target)
         {
-            return new SpatialAStar<GameMapTile>(map.Tiles).Search(client.GetPlayerLocationAsPoint(), target).Select(x => x.Location);
+            LinkedList<GameMapTile> shortestPath = new SpatialAStar<GameMapTile>(map.Tiles).Search(client.GetPlayerLocationAsPoint(), target);
+            return shortestPath?.Select(x => x.Location);
         }
 
         // Removes unnecessary nodes from the path
         private static IEnumerable<Point> SimplifyPath(IEnumerable<Point> path)
         {
+            if (path == null)
+            {
+                return null;
+            }
+
             List<Point> simplifiedPath = new List<Point>();
 
             // Information about the previous node
