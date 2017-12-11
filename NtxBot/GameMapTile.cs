@@ -9,6 +9,7 @@ namespace NtxBot
     {
         public Point Location { get; private set; }
 
+        public bool Uncovered { get; private set; }
         public bool Walkable { get; private set; }
 
         private TileStructure? tileStruct = null;
@@ -17,7 +18,8 @@ namespace NtxBot
         public GameMapTile(Point location)
         {
             Location = location;
-            Walkable = false;
+            Uncovered = false;
+            EvaluateWalkableProperty();
         }
 
         public GameMapTile(int x, int y) : this(new Point(x, y))
@@ -26,6 +28,8 @@ namespace NtxBot
 
         public void SetTile(ushort tileType)
         {
+            Uncovered = true;
+
             if (tileStruct == null || tileStruct.Value.ID != tileType)
             {
                 tileStruct = GameData.Tiles.ByID(tileType);
@@ -35,6 +39,8 @@ namespace NtxBot
 
         public void AddObject(ObjectStructure objStruct)
         {
+            Uncovered = true;
+
             if (!objStructs.Contains(objStruct))
             {
                 objStructs.Add(objStruct);
@@ -44,8 +50,8 @@ namespace NtxBot
 
         private void EvaluateWalkableProperty()
         {
-            // Null tiles are implicitly not walkable
-            if (tileStruct == null || !tileStruct.HasValue)
+            // Null tiles and covered tiles are implicitly not walkable
+            if (tileStruct == null || !tileStruct.HasValue || !Uncovered)
             {
                 Walkable = false;
                 return;

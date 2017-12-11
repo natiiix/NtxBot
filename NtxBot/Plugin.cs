@@ -75,6 +75,11 @@ namespace NtxBot
                 new MovementEngine(client, new FlashClient(), map).BeginMove(new Point(int.Parse(args[0]), int.Parse(args[1])));
             });
 
+            proxy.HookCommand("uncover", (client, cmd, args) =>
+            {
+                new AbyssBot(client, new FlashClient(), map).UncoverPath();
+            });
+
             proxy.HookPacket<UpdatePacket>(OnUpdate);
             proxy.HookPacket<NewTickPacket>(OnNewTick);
             proxy.HookPacket<MapInfoPacket>(OnMapInfo);

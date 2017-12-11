@@ -1,4 +1,5 @@
-﻿using Lib_K_Relay.Networking.Packets.DataObjects;
+﻿using System;
+using Lib_K_Relay.Networking.Packets.DataObjects;
 
 namespace NtxBot
 {
@@ -35,5 +36,7 @@ namespace NtxBot
         }
 
         public override int GetHashCode() => X.GetHashCode() ^ Y.GetHashCode();
+
+        public double DistanceTo(Point p) => Math.Sqrt(Math.Pow(p.X - X, 2) + Math.Pow(p.Y - Y, 2));
     }
 }
