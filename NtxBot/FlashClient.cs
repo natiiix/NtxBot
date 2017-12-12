@@ -89,7 +89,10 @@ namespace NtxBot
 
         private void SendKeyEventToFlash(Keys key, uint keyEvent)
         {
-            WinApi.PostMessage(flashPtr, keyEvent, (IntPtr)key, IntPtr.Zero);
+            // PostMessages causes the Flash window to freeze
+            //WinApi.PostMessage(flashPtr, keyEvent, (IntPtr)key, IntPtr.Zero);
+            // SendMessage doesn't seem to suffer from this problem
+            WinApi.SendMessage(flashPtr, keyEvent, (IntPtr)key, IntPtr.Zero);
         }
 
         //private static bool IsFlashProcess(Process proc) => proc.ProcessName.ToLower().StartsWith("flashplayer");
