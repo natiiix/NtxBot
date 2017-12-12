@@ -9,6 +9,7 @@ using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.DataObjects;
 */
 
+using System.Threading.Tasks;
 using Lib_K_Relay;
 using Lib_K_Relay.GameData;
 using Lib_K_Relay.Interface;
@@ -77,7 +78,7 @@ namespace NtxBot
 
             proxy.HookCommand("uncover", (client, cmd, args) =>
             {
-                new AbyssBot(client, new FlashClient(), map).UncoverPath();
+                Task.Factory.StartNew(new AbyssBot(client, new FlashClient(), map).UncoverPath);
             });
 
             proxy.HookPacket<UpdatePacket>(OnUpdate);

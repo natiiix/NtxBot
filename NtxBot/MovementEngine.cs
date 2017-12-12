@@ -32,7 +32,7 @@ namespace NtxBot
             moveTask = null;
         }
 
-        public void BeginMove(Point target)
+        public void Move(Point target)
         {
             // It's impossible to find a path that leads to an unwalkable tile
             if (!map.Tiles[target.X, target.Y].Walkable)
@@ -41,6 +41,38 @@ namespace NtxBot
                 return;
             }
 
+            // Find the shortest path and simplify it
+            IEnumerable<Point> shortestPath = FindShortestPath(target);
+
+            // Abort if no path is found
+            if (shortestPath == null || shortestPath.Count() == 0)
+            {
+                Plugin.Log("Unable to find a path to the destination!");
+                return;
+            }
+
+            // Convert points to locations pointing to the center of the tile rather than the top-left corner
+            IEnumerable<Location> converted = SimplifyPath(shortestPath).Select(x => new Location(x.X + 0.5f, x.Y + 0.5f));
+
+            // Move along the path
+            converted.ForEach(x =>
+            {
+                if (moveCTS != null && moveCTS.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                MoveDirectlyToTarget(x);
+            });
+
+            if (moveCTS == null || !moveCTS.IsCancellationRequested)
+            {
+                Plugin.Log("Arrived at the destination!");
+            }
+        }
+
+        public void BeginMove(Point target)
+        {
             // Cancel the previous movement task if there was any
             if (Moving)
             {
@@ -50,40 +82,10 @@ namespace NtxBot
 
             // Create a new movement task
             moveCTS = new CancellationTokenSource();
-            moveTask = Task.Factory.StartNew(() =>
-            {
-                // Find the shortest path and simplify it
-                IEnumerable<Point> shortestPath = FindShortestPath(target);
-
-                // Abort if no path is found
-                if (shortestPath == null || shortestPath.Count() == 0)
-                {
-                    Plugin.Log("Unable to find a path to the destination!");
-                    return;
-                }
-
-                // Convert points to locations pointing to the center of the tile rather than the top-left corner
-                IEnumerable<Location> converted = SimplifyPath(shortestPath).Select(x => new Location(x.X + 0.5f, x.Y + 0.5f));
-
-                // Move along the path
-                converted.ForEach(x =>
-                {
-                    if (moveCTS.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
-                    MoveDirectlyToTarget(x);
-                });
-
-                if (!moveCTS.IsCancellationRequested)
-                {
-                    Plugin.Log("Arrived at the destination!");
-                }
-            }, moveCTS.Token);
+            moveTask = Task.Factory.StartNew(() => Move(target), moveCTS.Token);
         }
 
-        public void CancelMove() => moveCTS.Cancel();
+        public void CancelMove() => moveCTS?.Cancel();
 
         private void MoveDirectlyToTarget(Location target)
         {
@@ -94,7 +96,7 @@ namespace NtxBot
             // Move towards the target location
             // Loop breaks when the target location is reached, when a task
             // cancellation is requested or when the client connection drops
-            while (client.Connected && !moveCTS.IsCancellationRequested &&
+            while (client.Connected && (moveCTS == null || !moveCTS.IsCancellationRequested) &&
                 flash.SetMovementDirection(target.X - client.PlayerData.Pos.X, target.Y - client.PlayerData.Pos.Y, MOVEMENT_THRESHOLD_DISTANCE))
             {
                 // Player has moved since the last iteration
@@ -115,7 +117,7 @@ namespace NtxBot
             // Stop all movement
             flash.StopMovement();
 
-            if (!moveCTS.IsCancellationRequested)
+            if (moveCTS == null || !moveCTS.IsCancellationRequested)
             {
                 // Only jump if it's possible for the player to get stuck
                 Point playerPos = client.GetPlayerLocationAsPoint();
@@ -141,7 +143,7 @@ namespace NtxBot
                 {
                     // Jump to the exact target location to avoid getting stuck
                     client.Jump(target);
-                    Thread.Sleep(200);
+                    Task.Delay(250);
                 }
             }
         }

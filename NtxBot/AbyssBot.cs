@@ -1,6 +1,8 @@
 ﻿using Lib_K_Relay.Networking;
+using Lib_K_Relay.GameData;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NtxBot
 {
@@ -21,10 +23,25 @@ namespace NtxBot
             moveEng = new MovementEngine(client, flash, map);
         }
 
-        public void Run()
-        {
-            // TODO
-        }
+        //public void Run()
+        //{
+        //    while (client.Connected)
+        //    {
+        //        Plugin.Log("Uncovering...");
+        //        UncoverPath();
+        //        Task.Delay(200);
+
+        //        int godIdx = map.LivingEntities.FindIndex(x => GameData.Objects.ByID(x.ObjectType).God);
+
+        //        //if (godIdx < 0 || map.LivingEntities[godIdx].Status.Position.DistanceTo(client.PlayerData.Pos) < 20)
+        //        //{
+        //        //    Plugin.Log("God reached!");
+        //        //    break;
+        //        //}
+        //    }
+
+        //    Plugin.Log("Done running!");
+        //}
 
         public void UncoverPath()
         {
@@ -36,7 +53,7 @@ namespace NtxBot
                 return;
             }
 
-            moveEng.BeginMove(pathPos);
+            moveEng.Move(pathPos);
         }
 
         private Point FindNearestCoveredPath()
