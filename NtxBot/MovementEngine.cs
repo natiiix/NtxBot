@@ -98,14 +98,14 @@ namespace NtxBot
                 // Player hasn't moved for some time
                 else if (DateTime.Now - dtLastMove >= TIME_BEFORE_STUCK)
                 {
-                    Plugin.Log("Stuck!");
-                    Plugin.Log("Player: " + playerPos.ToString());
-                    Plugin.Log("Target: " + target.ToString());
-                    throw new Exception("Stuck!");
+                    //Plugin.Log("Stuck!");
+                    //Plugin.Log("Player: " + playerPos.ToString());
+                    //Plugin.Log("Target: " + target.ToString());
+                    //throw new Exception("Stuck!");
 
                     // Stop moving to reset the key states
-                    //Plugin.Log("Resetting movement key states...");
-                    //flash.StopMovement();
+                    Plugin.Log("Resetting movement key states...");
+                    flash.StopMovement();
                 }
 
                 // Set movement direction
