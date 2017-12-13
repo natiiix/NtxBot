@@ -289,7 +289,7 @@ namespace NtxBot
         /// Returns null, if no path is found. Start- and End-Node are included in returned path. The user context
         /// is passed to IsWalkable().
         /// </summary>
-        public LinkedList<TPathNode> Search(Point inStartNode, Point inEndNode)
+        public LinkedList<TPathNode> Search(Point inStartNode, Point inEndNode, bool diagonal = false)
         {
             PathNode startNode = m_SearchSpace[inStartNode.X, inStartNode.Y];
             PathNode endNode = m_SearchSpace[inEndNode.X, inEndNode.Y];
@@ -300,7 +300,7 @@ namespace NtxBot
             if (startNode == endNode)
                 return new LinkedList<TPathNode>(new TPathNode[] { startNode.UserContext });
 
-            PathNode[] neighborNodes = new PathNode[8];
+            PathNode[] neighborNodes = new PathNode[diagonal ? 8 : 4];
 
             m_ClosedSet.Clear();
             m_OpenSet.Clear();
@@ -348,9 +348,8 @@ namespace NtxBot
 
                 StoreNeighborNodes(x, neighborNodes);
 
-                for (int i = 0; i < neighborNodes.Length; i++)
+                foreach (PathNode y in neighborNodes)
                 {
-                    PathNode y = neighborNodes[i];
                     Boolean tentative_is_better;
 
                     if (y == null)
@@ -432,45 +431,18 @@ namespace NtxBot
             int x = inAround.X;
             int y = inAround.Y;
 
-            if ((x > 0) && (y > 0))
-                inNeighbors[0] = m_SearchSpace[x - 1, y - 1];
-            else
-                inNeighbors[0] = null;
+            inNeighbors[0] = y > 0 ? m_SearchSpace[x, y - 1] : null;
+            inNeighbors[1] = x > 0 ? m_SearchSpace[x - 1, y] : null;
+            inNeighbors[2] = x < Width - 1 ? m_SearchSpace[x + 1, y] : null;
+            inNeighbors[3] = y < Height - 1 ? m_SearchSpace[x, y + 1] : null;
 
-            if (y > 0)
-                inNeighbors[1] = m_SearchSpace[x, y - 1];
-            else
-                inNeighbors[1] = null;
-
-            if ((x < Width - 1) && (y > 0))
-                inNeighbors[2] = m_SearchSpace[x + 1, y - 1];
-            else
-                inNeighbors[2] = null;
-
-            if (x > 0)
-                inNeighbors[3] = m_SearchSpace[x - 1, y];
-            else
-                inNeighbors[3] = null;
-
-            if (x < Width - 1)
-                inNeighbors[4] = m_SearchSpace[x + 1, y];
-            else
-                inNeighbors[4] = null;
-
-            if ((x > 0) && (y < Height - 1))
-                inNeighbors[5] = m_SearchSpace[x - 1, y + 1];
-            else
-                inNeighbors[5] = null;
-
-            if (y < Height - 1)
-                inNeighbors[6] = m_SearchSpace[x, y + 1];
-            else
-                inNeighbors[6] = null;
-
-            if ((x < Width - 1) && (y < Height - 1))
-                inNeighbors[7] = m_SearchSpace[x + 1, y + 1];
-            else
-                inNeighbors[7] = null;
+            if (inNeighbors.Length == 8) // diagonal
+            {
+                inNeighbors[4] = (x > 0) && (y > 0) ? m_SearchSpace[x - 1, y - 1] : null;
+                inNeighbors[5] = (x < Width - 1) && (y > 0) ? m_SearchSpace[x + 1, y - 1] : null;
+                inNeighbors[6] = (x > 0) && (y < Height - 1) ? m_SearchSpace[x - 1, y + 1] : null;
+                inNeighbors[7] = (x < Width - 1) && (y < Height - 1) ? m_SearchSpace[x + 1, y + 1] : null;
+            }
         }
 
         private class OpenCloseMap
