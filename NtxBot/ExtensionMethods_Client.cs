@@ -4,6 +4,7 @@ using Lib_K_Relay.Networking.Packets.Client;
 using Lib_K_Relay.Utilities;
 using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.DataObjects;
+using System.Threading.Tasks;
 
 namespace NtxBot
 {
@@ -40,15 +41,43 @@ namespace NtxBot
 
         public static Point GetPlayerLocationAsPoint(this Client client) => (Point)client.PlayerData.Pos;
 
-        public static void Jump(this Client client, Location target)
-        {
-            GotoPacket gp = Packet.Create<GotoPacket>(PacketType.GOTO);
+        //public static void MoveUsingGoTo(this Client client, Location target)
+        //{
+        //    const int delay = 200; // ms
 
-            gp.ObjectId = client.ObjectId;
-            gp.Location = target;
+        //    while (client.Connected)
+        //    {
+        //        Location playerPos = client.PlayerData.Pos;
+        //        double distanceToTarget = playerPos.DistanceSquaredTo(target);
 
-            Plugin.blockNextGotoAck = true;
-            client.SendToClient(gp);
-        }
+        //        if (distanceToTarget <= 0)
+        //        {
+        //            return;
+        //        }
+
+        //        GotoPacket gp = Packet.Create<GotoPacket>(PacketType.GOTO);
+        //        gp.ObjectId = client.ObjectId;
+
+        //        double maxDistance = client.PlayerData.TilesPerTick() / 1000.0 * delay;
+
+        //        if (distanceToTarget < maxDistance)
+        //        {
+        //            gp.Location = target;
+        //        }
+        //        else
+        //        {
+        //            double multiplier = maxDistance / distanceToTarget;
+        //            Location partialTarget = new Location(
+        //                (float)(playerPos.X + ((target.X - playerPos.X) * multiplier)),
+        //                (float)(playerPos.Y + ((target.Y - playerPos.Y) * multiplier)));
+
+        //            gp.Location = partialTarget;
+        //        }
+
+        //        Plugin.blockNextGotoAck = true;
+        //        client.SendToClient(gp);
+        //        Task.Delay(delay);
+        //    }
+        //}
     }
 }

@@ -23,44 +23,43 @@ namespace NtxBot
             moveEng = new MovementEngine(client, flash, map);
         }
 
-        //public void Run()
-        //{
-        //    while (client.Connected)
-        //    {
-        //        Plugin.Log("Uncovering...");
-        //        UncoverPath();
-        //        Task.Delay(200);
+        public void Run()
+        {
+            while (client.Connected)
+            {
+                Plugin.Log("Uncovering...");
+                UncoverPath();
 
-        //        int godIdx = map.LivingEntities.FindIndex(x => GameData.Objects.ByID(x.ObjectType).God);
+                if (map.LivingEntities.FindIndex(x => x.ObjectType == 0x090a) >= 0)
+                {
+                    Plugin.Log("Boss reached!");
+                    break;
+                }
+            }
 
-        //        //if (godIdx < 0 || map.LivingEntities[godIdx].Status.Position.DistanceTo(client.PlayerData.Pos) < 20)
-        //        //{
-        //        //    Plugin.Log("God reached!");
-        //        //    break;
-        //        //}
-        //    }
-
-        //    Plugin.Log("Done running!");
-        //}
+            Plugin.Log("Done running!");
+        }
 
         public void UncoverPath()
         {
-            Point pathPos = FindNearestCoveredPath();
+            IEnumerable<Point> pathToUncover = FindNearestCoveredPath();
 
-            if (pathPos == null)
+            if (pathToUncover == null || pathToUncover.Count() == 0)
             {
                 Plugin.Log("No covered path available!");
                 return;
             }
 
-            moveEng.Move(pathPos);
+            moveEng.MoveDirectlyAlongPath(pathToUncover);
+
+            Plugin.Log("Done uncovering!");
         }
 
-        private Point FindNearestCoveredPath()
+        private IEnumerable<Point> FindNearestCoveredPath()
         {
             List<Point> coveredPaths = new List<Point>();
 
-            // Find walkable tiles with an uncovered tile next to them
+            // Find walkable tiles with a covered tile next to them
             for (int y = 0; y < map.Height; y++)
             {
                 for (int x = 0; x < map.Width; x++)
@@ -69,6 +68,7 @@ namespace NtxBot
                     {
                         bool keepGoing = true;
 
+                        // Check the surrounding tiles for covered tiles
                         for (int yOffset = y == 0 ? 0 : -1; yOffset <= 1 && y + yOffset < map.Height && keepGoing; yOffset++)
                         {
                             for (int xOffset = x == 0 ? 0 : -1; xOffset <= 1 && x + xOffset < map.Width && keepGoing; xOffset++)
@@ -95,9 +95,25 @@ namespace NtxBot
                 return null;
             }
 
-            // Find the path closest to the player
+            // Order the paths by distance to player in ascending order
             Point playerPos = client.GetPlayerLocationAsPoint();
-            return coveredPaths.OrderBy(x => x.DistanceTo(playerPos)).First();
+            IOrderedEnumerable<Point> pathsByDistance = coveredPaths.OrderBy(x => x.DistanceTo(playerPos));
+
+            // Find the nearest covered path with a valid path leading to it
+            foreach (Point x in pathsByDistance)
+            {
+                // Try to find a path to the target position
+                IEnumerable<Point> path = map.FindShortestPath(playerPos, x);
+
+                // If there is a path that leads to the target position return it
+                if (path != null && path.Count() != 0)
+                {
+                    return path;
+                }
+            }
+
+            // There is no covered path that can be uncovered
+            return null;
         }
     }
 }

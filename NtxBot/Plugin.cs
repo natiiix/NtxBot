@@ -81,6 +81,11 @@ namespace NtxBot
                 Task.Factory.StartNew(new AbyssBot(client, new FlashClient(), map).UncoverPath);
             });
 
+            proxy.HookCommand("abyss", (client, cmd, args) =>
+            {
+                Task.Factory.StartNew(new AbyssBot(client, new FlashClient(), map).Run);
+            });
+
             proxy.HookPacket<UpdatePacket>(OnUpdate);
             proxy.HookPacket<NewTickPacket>(OnNewTick);
             proxy.HookPacket<MapInfoPacket>(OnMapInfo);

@@ -3,6 +3,7 @@ using Lib_K_Relay.GameData.DataStructures;
 using Lib_K_Relay.Networking.Packets.DataObjects;
 using Lib_K_Relay.Networking.Packets.Server;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NtxBot
 {
@@ -78,6 +79,12 @@ namespace NtxBot
             {
                 LivingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x => x.Status = stat);
             }
+        }
+
+        public IEnumerable<Point> FindShortestPath(Point playerLocation, Point target)
+        {
+            LinkedList<GameMapTile> shortestPath = new SpatialAStar<GameMapTile>(Tiles).Search(playerLocation, target);
+            return shortestPath?.Select(x => x.Location);
         }
     }
 }

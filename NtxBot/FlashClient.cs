@@ -45,6 +45,11 @@ namespace NtxBot
         private KeyWrapper keyS;
         private KeyWrapper keyD;
 
+        public bool W { set => keyW.Pressed = value; }
+        public bool A { set => keyA.Pressed = value; }
+        public bool S { set => keyS.Pressed = value; }
+        public bool D { set => keyD.Pressed = value; }
+
         public FlashClient()
         {
             //flashPtr = GetFlashHandle();
@@ -56,35 +61,9 @@ namespace NtxBot
             keyD = new KeyWrapper(x => SendKeyEventToFlash(Keys.D, x));
         }
 
-        public bool SetMovementDirection(double x, double y, double threshold)
-        {
-            if (threshold < 0)
-            {
-                throw new ArgumentException("Threshold must not be a negative value.");
-            }
-
-            // Up
-            keyW.Pressed = y < -threshold;
-
-            // Left
-            keyA.Pressed = x < -threshold;
-
-            // Down
-            keyS.Pressed = y > threshold;
-
-            // Right
-            keyD.Pressed = x > threshold;
-
-            // Returns true if the character is going to move, returns false if it's going to be stationary
-            return Math.Abs(x) > threshold || Math.Abs(y) > threshold;
-        }
-
         public void StopMovement()
         {
-            keyW.Pressed = false;
-            keyA.Pressed = false;
-            keyS.Pressed = false;
-            keyD.Pressed = false;
+            W = A = S = D = false;
         }
 
         private void SendKeyEventToFlash(Keys key, uint keyEvent)
