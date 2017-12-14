@@ -26,6 +26,12 @@ namespace NtxBot
 
         public void Run()
         {
+            if (map.Name != "Abyss of Demons")
+            {
+                Plugin.Log("You must be in an Abyss to use this command!");
+                return;
+            }
+
             if (map.QuestObject == null)
             {
                 Plugin.Log("Cannot start the Abyss bot! Quest object is not available!");
@@ -39,7 +45,7 @@ namespace NtxBot
             {
                 Entity boss = map.QuestObject;
 
-                if (boss == null && client.PlayerData.Pos.DistanceTo(boss.Status.Position) < 16)
+                if (boss == null || client.PlayerData.Pos.DistanceTo(boss.Status.Position) < 16)
                 {
                     break;
                 }
