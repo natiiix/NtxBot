@@ -9,16 +9,12 @@ namespace NtxBot
 {
     public class GameMap
     {
-        private const int NO_QUEST = -1;
-
         public readonly string Name;
         public readonly int Width;
         public readonly int Height;
 
         public GameMapTile[,] Tiles { get; private set; }
         public List<Entity> LivingEntities { get; private set; }
-
-        private int questObjectId;
 
         public Entity QuestObject
         {
@@ -40,6 +36,8 @@ namespace NtxBot
             }
         }
 
+        private int questObjectId;
+
         public GameMap(MapInfoPacket mip)
         {
             Name = mip.Name;
@@ -58,7 +56,7 @@ namespace NtxBot
             }
 
             LivingEntities = new List<Entity>();
-            questObjectId = NO_QUEST;
+            questObjectId = -1;
         }
 
         public void ProcessPacket(UpdatePacket p)
@@ -72,7 +70,7 @@ namespace NtxBot
                 // Get object structure
                 ObjectStructure objStruct = GameData.Objects.ByID(ent.ObjectType);
 
-                // Quest object arrived
+                // Quest object
                 if (ent.Status.ObjectId == questObjectId)
                 {
                     Plugin.Log("New quest: " + objStruct.Name);
@@ -96,7 +94,7 @@ namespace NtxBot
                 }
             }
 
-            // Drops
+            // Droped (no longer present) objects
             foreach (int objId in p.Drops)
             {
                 // Remove objects with the specified object ID from the list
