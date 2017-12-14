@@ -70,12 +70,6 @@ namespace NtxBot
                 // Get object structure
                 ObjectStructure objStruct = GameData.Objects.ByID(ent.ObjectType);
 
-                // Quest object
-                if (ent.Status.ObjectId == questObjectId)
-                {
-                    Plugin.Log("New quest: " + objStruct.Name);
-                }
-
                 // Objects with 0 maximum HP are immobile world elements
                 // These objects are stored inside of the tiles on which they're standing
                 if (objStruct.OccupySquare || (objStruct.MaxHP == 0 && !objStruct.Pet))
@@ -90,6 +84,13 @@ namespace NtxBot
                 // Add new living entities to the list
                 else
                 {
+                    // Quest object
+                    if (ent.Status.ObjectId == questObjectId)
+                    //if (objStruct.Quest)
+                    {
+                        Plugin.Log("Quest object appeared: " + objStruct.Name);
+                    }
+
                     LivingEntities.Add(ent);
                 }
             }
@@ -97,13 +98,14 @@ namespace NtxBot
             // Droped (no longer present) objects
             foreach (int objId in p.Drops)
             {
-                // Remove objects with the specified object ID from the list
                 if (objId == questObjectId)
+                //if (LivingEntities.Exists(x => x.Status.ObjectId == objId) && GameData.Objects.ByID(LivingEntities.Find(x => x.Status.ObjectId == objId).ObjectType).Quest)
                 {
                     Plugin.Log("Quest object dropped!");
                 }
 
-                LivingEntities.RemoveAll(x => x.Status.ObjectId == objId);
+                // Remove objects with the specified object ID from the list
+                LivingEntities.RemoveAll(x => x.Status.ObjectId == objId /*&& !GameData.Objects.ByID(x.ObjectType).Quest*/);
             }
         }
 
@@ -122,6 +124,12 @@ namespace NtxBot
             if (p.ObjectId != questObjectId)
             {
                 questObjectId = p.ObjectId;
+
+                // This shouldn't happen
+                if (QuestObject != null)
+                {
+                    Plugin.Log("Quest object is already present!");
+                }
             }
         }
 
