@@ -32,36 +32,34 @@ namespace NtxBot
                 return;
             }
 
-            Plugin.Log("Uncovering...");
+            Plugin.Log("Running...");
 
-            while (client.Connected)
+            // Keep uncovering until the boss is reached or something fails
+            while (client.Connected && UncoverPath())
             {
-                UncoverPath();
-
                 Entity boss = map.QuestObject;
 
-                if (boss == null && client.PlayerData.Pos.DistanceTo(boss.Status.Position) < 20)
+                if (boss == null && client.PlayerData.Pos.DistanceTo(boss.Status.Position) < 16)
                 {
                     break;
                 }
             }
 
-            Plugin.Log("Done uncovering!");
+            Plugin.Log("Done!");
         }
 
-        public void UncoverPath()
+        public bool UncoverPath()
         {
             IEnumerable<Point> pathToUncover = FindNearestCoveredPath();
 
             if (pathToUncover == null || pathToUncover.Count() == 0)
             {
                 Plugin.Log("No covered path available!");
-                return;
+                return false;
             }
 
             moveEng.MoveDirectlyAlongPath(pathToUncover);
-
-            Plugin.Log("Done uncovering!");
+            return true;
         }
 
         private IEnumerable<Point> FindNearestCoveredPath()

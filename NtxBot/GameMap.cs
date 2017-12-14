@@ -70,9 +70,21 @@ namespace NtxBot
                 // Get object structure
                 ObjectStructure objStruct = GameData.Objects.ByID(ent.ObjectType);
 
-                // Objects with 0 maximum HP are immobile world elements
-                // These objects are stored inside of the tiles on which they're standing
-                if (objStruct.OccupySquare || (objStruct.MaxHP == 0 && !objStruct.Pet))
+                // An object has to fall under one of these categories to be considered a living entity
+                if (objStruct.Player || objStruct.Enemy || objStruct.God || objStruct.Pet || objStruct.Quest)
+                {
+                    // Add new living entities to the list
+                    LivingEntities.Add(ent);
+
+                    // Quest object
+                    if (ent.Status.ObjectId == questObjectId)
+                    {
+                        Plugin.Log("Current quest: " + objStruct.Name);
+                    }
+                }
+                // Everything else is considered an static world element
+                // Static world elements are stored inside of the tiles on which they're standing
+                else
                 {
                     // Get the tile coordinates
                     int x = (int)ent.Status.Position.X;
@@ -81,31 +93,13 @@ namespace NtxBot
                     // Add the object to the tile
                     Tiles[x, y].AddObject(objStruct);
                 }
-                // Add new living entities to the list
-                else
-                {
-                    // Quest object
-                    if (ent.Status.ObjectId == questObjectId)
-                    //if (objStruct.Quest)
-                    {
-                        Plugin.Log("Quest object appeared: " + objStruct.Name);
-                    }
-
-                    LivingEntities.Add(ent);
-                }
             }
 
             // Droped (no longer present) objects
             foreach (int objId in p.Drops)
             {
-                if (objId == questObjectId)
-                //if (LivingEntities.Exists(x => x.Status.ObjectId == objId) && GameData.Objects.ByID(LivingEntities.Find(x => x.Status.ObjectId == objId).ObjectType).Quest)
-                {
-                    Plugin.Log("Quest object dropped!");
-                }
-
                 // Remove objects with the specified object ID from the list
-                LivingEntities.RemoveAll(x => x.Status.ObjectId == objId /*&& !GameData.Objects.ByID(x.ObjectType).Quest*/);
+                LivingEntities.RemoveAll(x => x.Status.ObjectId == objId);
             }
         }
 
@@ -123,13 +117,8 @@ namespace NtxBot
             // New quest
             if (p.ObjectId != questObjectId)
             {
+                // Copy the object ID
                 questObjectId = p.ObjectId;
-
-                // This shouldn't happen
-                if (QuestObject != null)
-                {
-                    Plugin.Log("Quest object is already present!");
-                }
             }
         }
 
