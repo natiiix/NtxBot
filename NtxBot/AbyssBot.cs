@@ -3,6 +3,7 @@ using Lib_K_Relay.GameData;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lib_K_Relay.Networking.Packets.DataObjects;
 
 namespace NtxBot
 {
@@ -25,19 +26,27 @@ namespace NtxBot
 
         public void Run()
         {
+            if (map.QuestObject == null)
+            {
+                Plugin.Log("Cannot start the Abyss bot! Quest object is not available!");
+                return;
+            }
+
+            Plugin.Log("Uncovering...");
+
             while (client.Connected)
             {
-                Plugin.Log("Uncovering...");
                 UncoverPath();
 
-                if (map.LivingEntities.FindIndex(x => x.ObjectType == 0x090a) >= 0)
+                Entity boss = map.QuestObject;
+
+                if (boss == null && client.PlayerData.Pos.DistanceTo(boss.Status.Position) < 20)
                 {
-                    Plugin.Log("Boss reached!");
                     break;
                 }
             }
 
-            Plugin.Log("Done running!");
+            Plugin.Log("Done uncovering!");
         }
 
         public void UncoverPath()
@@ -95,9 +104,14 @@ namespace NtxBot
                 return null;
             }
 
-            // Order the paths by distance to player in ascending order
             Point playerPos = client.GetPlayerLocationAsPoint();
-            IOrderedEnumerable<Point> pathsByDistance = coveredPaths.OrderBy(x => x.DistanceTo(playerPos));
+            Location bossPos = map.QuestObject.Status.Position;
+
+            // Order the paths by distance to the player in ascending order
+            //IOrderedEnumerable<Point> pathsByDistance = coveredPaths.OrderBy(x => x.DistanceTo(playerPos));
+
+            // Order the paths by distance to the boss in ascending order
+            IOrderedEnumerable<Point> pathsByDistance = coveredPaths.OrderBy(x => ((Location)x).DistanceTo(bossPos));
 
             // Find the nearest covered path with a valid path leading to it
             foreach (Point x in pathsByDistance)
