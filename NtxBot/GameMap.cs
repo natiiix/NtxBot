@@ -9,12 +9,36 @@ namespace NtxBot
 {
     public class GameMap
     {
+        private const int NO_QUEST = -1;
+
         public readonly string Name;
         public readonly int Width;
         public readonly int Height;
 
         public GameMapTile[,] Tiles { get; private set; }
         public List<Entity> LivingEntities { get; private set; }
+
+        private int questObjectId;
+
+        public Entity QuestObject
+        {
+            get
+            {
+                if (questObjectId < 0)
+                {
+                    return null;
+                }
+
+                int idx = LivingEntities.FindIndex(x => x.Status.ObjectId == questObjectId);
+
+                if (idx < 0)
+                {
+                    return null;
+                }
+
+                return LivingEntities[idx];
+            }
+        }
 
         public GameMap(MapInfoPacket mip)
         {
@@ -34,6 +58,7 @@ namespace NtxBot
             }
 
             LivingEntities = new List<Entity>();
+            questObjectId = NO_QUEST;
         }
 
         public void ProcessPacket(UpdatePacket p)
@@ -44,7 +69,14 @@ namespace NtxBot
             // New objects
             foreach (Entity ent in p.NewObjs)
             {
+                // Get object structure
                 ObjectStructure objStruct = GameData.Objects.ByID(ent.ObjectType);
+
+                // Quest object arrived
+                if (ent.Status.ObjectId == questObjectId)
+                {
+                    Plugin.Log("New quest: " + objStruct.Name);
+                }
 
                 // Objects with 0 maximum HP are immobile world elements
                 // These objects are stored inside of the tiles on which they're standing
@@ -68,6 +100,11 @@ namespace NtxBot
             foreach (int objId in p.Drops)
             {
                 // Remove objects with the specified object ID from the list
+                if (objId == questObjectId)
+                {
+                    Plugin.Log("Quest object dropped!");
+                }
+
                 LivingEntities.RemoveAll(x => x.Status.ObjectId == objId);
             }
         }
@@ -78,6 +115,15 @@ namespace NtxBot
             foreach (Status stat in p.Statuses)
             {
                 LivingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x => x.Status = stat);
+            }
+        }
+
+        public void ProcessPacket(QuestObjIdPacket p)
+        {
+            // New quest
+            if (p.ObjectId != questObjectId)
+            {
+                questObjectId = p.ObjectId;
             }
         }
 

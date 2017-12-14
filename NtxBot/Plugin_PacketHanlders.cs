@@ -54,5 +54,10 @@ namespace NtxBot
                 blockNextGotoAck = false;
             }
         }
+
+        private void OnQuestObjId(Client client, QuestObjIdPacket p)
+        {
+            map?.ProcessPacket(p);
+        }
     }
 }

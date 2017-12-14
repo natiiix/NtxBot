@@ -15,6 +15,7 @@ using Lib_K_Relay.GameData;
 using Lib_K_Relay.Interface;
 using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.Client;
+using Lib_K_Relay.Networking.Packets.DataObjects;
 
 namespace NtxBot
 {
@@ -86,10 +87,17 @@ namespace NtxBot
                 Task.Factory.StartNew(new AbyssBot(client, new FlashClient(), map).Run);
             });
 
+            proxy.HookCommand("quest", (client, cmd, args) =>
+            {
+                Entity questObject = map?.QuestObject;
+                Log("Quest: " + (questObject == null ? "NULL" : GameData.Objects.ByID(questObject.ObjectType).Name));
+            });
+
             proxy.HookPacket<UpdatePacket>(OnUpdate);
             proxy.HookPacket<NewTickPacket>(OnNewTick);
             proxy.HookPacket<MapInfoPacket>(OnMapInfo);
             proxy.HookPacket<GotoAckPacket>(OnGotoAck);
+            proxy.HookPacket<QuestObjIdPacket>(OnQuestObjId);
 
             Log("Packets hooked");
         }
