@@ -2,6 +2,7 @@
 using Lib_K_Relay.GameData.DataStructures;
 using Lib_K_Relay.Networking.Packets.DataObjects;
 using Lib_K_Relay.Networking.Packets.Server;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -126,6 +127,89 @@ namespace NtxBot
         {
             LinkedList<GameMapTile> shortestPath = new SpatialAStar<GameMapTile>(Tiles).Search(playerLocation, target);
             return shortestPath?.Select(x => x.Location);
+        }
+
+        /* Visualization of the square radius meaning
+         * 22222
+         * 21112
+         * 21012
+         * 21112
+         * 22222
+         */
+
+        public List<Point> GetWalkableTilesInSquareRadius(Point baseTile, int radius)
+        {
+            if (radius < 0)
+            {
+                throw new ArgumentException("Radius must not be negative.");
+            }
+
+            int left = baseTile.X - radius;
+            int right = baseTile.X + radius;
+            int top = baseTile.Y - radius;
+            int bottom = baseTile.Y + radius;
+
+            List<Point> tiles = new List<Point>();
+
+            // Vertical sides
+            for (int y = (top >= 0 ? top : 0); y <= (bottom < Height ? bottom : Height - 1); y++)
+            {
+                // Left side tile
+                if (left >= 0 && Tiles[left, y].Walkable)
+                {
+                    tiles.Add(new Point(left, y));
+                }
+
+                // Right side tile
+                if (right < Width && Tiles[right, y].Walkable)
+                {
+                    tiles.Add(new Point(right, y));
+                }
+            }
+
+            // Horizontal side
+            for (int x = (left >= 0 ? left : 0); x < (right < Width ? right : Width - 1); x++)
+            {
+                // Top side tile
+                if (top >= 0 && Tiles[x, top].Walkable)
+                {
+                    tiles.Add(new Point(x, top));
+                }
+
+                // Bottom side tile
+                if (bottom < Height && Tiles[x, bottom].Walkable)
+                {
+                    tiles.Add(new Point(x, bottom));
+                }
+            }
+
+            return tiles;
+        }
+
+        public IEnumerable<Point> GetWalkableTilesInDistanceFromTile(Point baseTile, double minDistance, double maxDistance)
+        {
+            if (maxDistance < minDistance)
+            {
+                throw new ArgumentException("Maximum distance must be higher than minimum distance.");
+            }
+
+            int minRadius = (int)Math.Floor(minDistance);
+            int maxRadius = (int)Math.Ceiling(maxDistance);
+
+            List<Point> allTiles = new List<Point>();
+
+            // Get tiles from every radius within the limits
+            for (int radius = minRadius; radius <= maxRadius; radius++)
+            {
+                allTiles.AddRange(GetWalkableTilesInSquareRadius(baseTile, radius));
+            }
+
+            // Returns tiles within the specified distance
+            return allTiles.Where(x =>
+            {
+                double dist = x.DistanceTo(baseTile);
+                return dist >= minDistance && dist <= maxDistance;
+            });
         }
     }
 }

@@ -9,6 +9,9 @@ namespace NtxBot
 {
     public class AbyssBot
     {
+        private const double BOSS_DISTANCE_MIN = 4;
+        private const double BOSS_DISTANCE_MAX = 7;
+
         private Client client;
         private FlashClient flash;
         private GameMap map;
@@ -38,17 +41,33 @@ namespace NtxBot
                 return;
             }
 
-            Plugin.Log("Running...");
+            Plugin.Log("Uncovering...");
 
             // Keep uncovering until the boss is reached or something fails
             while (client.Connected && UncoverPath())
             {
                 Entity boss = map.QuestObject;
 
-                if (boss == null || client.PlayerData.Pos.DistanceTo(boss.Status.Position) < 25)
+                if (boss == null || client.PlayerData.Pos.DistanceTo(boss.Status.Position) < BOSS_DISTANCE_MAX)
                 {
                     break;
                 }
+            }
+
+            Plugin.Log("Fighting the boss...");
+
+            // Boss fight
+            while (client.Connected)
+            {
+                Entity boss = map.QuestObject;
+
+                if (boss == null)
+                {
+                    break;
+                }
+
+                // Follow the boss
+                moveEng.MoveDirectlyAlongPath(FindPathToBossFight());
             }
 
             Plugin.Log("Done!");
@@ -126,13 +145,51 @@ namespace NtxBot
                 IEnumerable<Point> path = map.FindShortestPath(playerTile, x);
 
                 // If there is a path that leads to the target position return it
-                if (path != null && path.Count() != 0)
+                if (path != null && path.Count() > 0)
                 {
                     return path;
                 }
             }
 
             // There is no covered path that can be uncovered
+            return null;
+        }
+
+        private IEnumerable<Point> FindPathToBossFight()
+        {
+            Entity boss = map.QuestObject;
+
+            if (boss == null)
+            {
+                return null;
+            }
+
+            // Get all the walkable tile within a reasonable distance of the boss
+            Point bossTile = (Point)boss.Status.Position;
+            IEnumerable<Point> usableTiles = map.GetWalkableTilesInDistanceFromTile(bossTile, BOSS_DISTANCE_MIN, BOSS_DISTANCE_MAX);
+
+            if (usableTiles == null || usableTiles.Count() == 0)
+            {
+                return null;
+            }
+
+            // Order the tiles by their distance from the player in ascending order
+            Location playerPos = client.PlayerData.Pos;
+            IOrderedEnumerable<Point> tilesClosestToPlayer = usableTiles.OrderBy(x => ((Location)x).DistanceTo(playerPos));
+
+            // Find the path to the closest possible tile
+            Point playerTile = client.GetPlayerLocationAsPoint();
+            foreach (Point tile in tilesClosestToPlayer)
+            {
+                IEnumerable<Point> path = map.FindShortestPath(playerTile, tile);
+
+                // If the path is valid return it
+                if (path != null && path.Count() > 0)
+                {
+                    return path;
+                }
+            }
+
             return null;
         }
     }
