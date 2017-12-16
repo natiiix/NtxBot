@@ -108,20 +108,22 @@ namespace NtxBot
                 return null;
             }
 
-            Point playerPos = client.GetPlayerLocationAsPoint();
             Location bossPos = map.QuestObject.Status.Position;
+            Location playerPos = client.PlayerData.Pos;
+            Point playerTile = client.GetPlayerLocationAsPoint();
 
-            // Order the paths by distance to the player in ascending order
-            //IOrderedEnumerable<Point> pathsByDistance = coveredPaths.OrderBy(x => x.DistanceTo(playerPos));
-
-            // Order the paths by distance to the boss in ascending order
-            IOrderedEnumerable<Point> pathsByDistance = coveredPaths.OrderBy(x => ((Location)x).DistanceTo(bossPos));
+            // Order the paths by their distance from the boss and the player in ascending order
+            IOrderedEnumerable<Point> pathsByDistance = coveredPaths.OrderBy(x =>
+            {
+                Location pathPos = (Location)x;
+                return pathPos.DistanceSquaredTo(bossPos) + pathPos.DistanceSquaredTo(playerPos);
+            });
 
             // Find the nearest covered path with a valid path leading to it
             foreach (Point x in pathsByDistance)
             {
                 // Try to find a path to the target position
-                IEnumerable<Point> path = map.FindShortestPath(playerPos, x);
+                IEnumerable<Point> path = map.FindShortestPath(playerTile, x);
 
                 // If there is a path that leads to the target position return it
                 if (path != null && path.Count() != 0)
