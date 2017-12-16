@@ -144,6 +144,7 @@ namespace NtxBot
                 throw new ArgumentException("Radius must not be negative.");
             }
 
+            // Get the boundaries of the square
             int left = baseTile.X - radius;
             int right = baseTile.X + radius;
             int top = baseTile.Y - radius;
@@ -188,11 +189,13 @@ namespace NtxBot
 
         public IEnumerable<Point> GetWalkableTilesInDistanceFromTile(Point baseTile, double minDistance, double maxDistance)
         {
+            // Maximum distance must not be lower than minumum distance
             if (maxDistance < minDistance)
             {
                 throw new ArgumentException("Maximum distance must be higher than minimum distance.");
             }
 
+            // Get value of the lowest and the highest radius to consider when searching for walkable tiles
             int minRadius = (int)Math.Floor(minDistance);
             int maxRadius = (int)Math.Ceiling(maxDistance);
 

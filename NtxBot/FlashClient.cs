@@ -52,7 +52,6 @@ namespace NtxBot
 
         public FlashClient()
         {
-            //flashPtr = GetFlashHandle();
             flashPtr = WinApi.GetForegroundWindow();
 
             keyUp = new KeyWrapper(x => SendKeyEventToFlash(Keys.W, x));
@@ -76,14 +75,11 @@ namespace NtxBot
 
         private void SendKeyEventToFlash(Keys key, uint keyEvent)
         {
-            // PostMessages causes the Flash window to freeze
-            //WinApi.PostMessage(flashPtr, keyEvent, (IntPtr)key, IntPtr.Zero);
+            // PostMessage causes the Flash window to freeze
             // SendMessage doesn't seem to suffer from this problem
+
+            // Send a message about the key event to the Flash window via Windows API
             WinApi.SendMessage(flashPtr, keyEvent, (IntPtr)key, IntPtr.Zero);
         }
-
-        //private static bool IsFlashProcess(Process proc) => proc.ProcessName.ToLower().StartsWith("flashplayer");
-
-        //private static IntPtr GetFlashHandle() => Process.GetProcesses().Single(IsFlashProcess).MainWindowHandle;
     }
 }
