@@ -16,7 +16,8 @@ namespace NtxBot
 
         public static explicit operator Point(Location a) => new Point((int)a.X, (int)a.Y);
 
-        public static explicit operator Location(Point a) => new Location(a.X, a.Y);
+        // Convert the point to a location pointing to the center of the tile rather than the top-left corner
+        public static explicit operator Location(Point a) => new Location(a.X + 0.5f, a.Y + 0.5f);
 
         public override string ToString() => "{ X=" + X.ToString() + "; Y=" + Y.ToString() + " }";
 

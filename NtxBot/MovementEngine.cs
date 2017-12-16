@@ -135,48 +135,6 @@ namespace NtxBot
 
             // Stop all movement
             flash.StopMovement();
-
-            //if (moveCTS == null || !moveCTS.IsCancellationRequested)
-            //{
-            //    // Only jump if it's possible for the player to get stuck
-            //    Point playerPos = client.GetPlayerLocationAsPoint();
-
-            //    // Get all the surrounding tiles
-            //    List<GameMapTile> surroundingTiles = new List<GameMapTile>();
-
-            //    for (int y = (playerPos.Y > 0 ? -1 : 0); y <= (playerPos.Y < map.Height - 1 ? 1 : 0); y++)
-            //    {
-            //        for (int x = (playerPos.X > 0 ? -1 : 0); x <= (playerPos.X < map.Width - 1 ? 1 : 0); x++)
-            //        {
-            //            if (y == 0 && x == 0)
-            //            {
-            //                continue;
-            //            }
-
-            //            surroundingTiles.Add(map.Tiles[playerPos.X + x, playerPos.Y + y]);
-            //        }
-            //    }
-
-            //    // If one of the surrounding tiles is unwalkable
-            //    if (surroundingTiles.Exists(x => !x.Walkable))
-            //    {
-            //        // Jump to the exact target location to avoid getting stuck
-            //        client.MoveUsingGoTo(target);
-            //        Task.Delay(250);
-            //    }
-            //}
-        }
-
-        public void MoveDirectlyToTarget(Point target)
-        {
-            if (!map.Tiles[target.X, target.Y].Walkable)
-            {
-                Plugin.Log("Unable to move to an unwalkable tile!");
-                return;
-            }
-
-            // Convert the point to a location pointing to the center of the tile rather than the top-left corner
-            MoveDirectlyToTarget(new Location(target.X + 0.5f, target.Y + 0.5f));
         }
 
         public void MoveDirectlyAlongPath(IEnumerable<Point> pathNodes)
@@ -197,7 +155,7 @@ namespace NtxBot
                     return;
                 }
 
-                MoveDirectlyToTarget(x);
+                MoveDirectlyToTarget((Location)x);
             });
         }
 
