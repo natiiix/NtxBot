@@ -12,7 +12,7 @@ namespace NtxBot
     public class MovementEngine
     {
         private const double MOVEMENT_DISTANCE_THRESHOLD = 0.5;
-        private static readonly TimeSpan TIME_BEFORE_STUCK = TimeSpan.FromSeconds(0.5);
+        private static readonly TimeSpan TIME_BEFORE_KEY_RESET = TimeSpan.FromSeconds(1);
 
         private Client client;
         private FlashClient flash;
@@ -88,20 +88,19 @@ namespace NtxBot
             {
                 Location playerPos = client.PlayerData.Pos;
 
-                // Every now and then check if the player is stuck
-                if (DateTime.Now - dtLastMove >= TIME_BEFORE_STUCK)
+                // Player has moved since the last tick
+                if (lastPlayerPos.X != playerPos.X || lastPlayerPos.Y != playerPos.Y)
                 {
-                    // Player hasn't moved for some time
-                    if (lastPlayerPos.X == playerPos.X || lastPlayerPos.Y == playerPos.Y)
-                    {
-                        // Stop moving to reset the key states
-                        Plugin.Log("Resetting movement key states...");
-                        flash.StopMovement();
-                    }
-
                     // Update the current time and player position
                     lastPlayerPos = playerPos;
                     dtLastMove = DateTime.Now;
+                }
+                // Player hasn't moved for too long
+                else if (DateTime.Now - dtLastMove >= TIME_BEFORE_KEY_RESET)
+                {
+                    // Stop moving to reset the key states
+                    Plugin.Log("Resetting movement key states...");
+                    flash.StopMovement();
                 }
 
                 // Set movement direction
