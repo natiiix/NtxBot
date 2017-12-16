@@ -59,5 +59,14 @@ namespace NtxBot
         {
             map?.ProcessPacket(p);
         }
+
+        private void OnDamage(Client client, DamagePacket p)
+        {
+            if (p.TargetId == client.ObjectId &&
+                (client.PlayerData.Health - p.Damage) / (double)client.PlayerData.MaxHealth < 0.7)
+            {
+                flash?.UseAbility();
+            }
+        }
     }
 }

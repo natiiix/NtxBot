@@ -66,6 +66,14 @@ namespace NtxBot
             W = A = S = D = false;
         }
 
+        public void UseAbility()
+        {
+            const Keys KEY_ABILITY = Keys.Space;
+
+            SendKeyEventToFlash(KEY_ABILITY, WM_KEYDOWN);
+            SendKeyEventToFlash(KEY_ABILITY, WM_KEYUP);
+        }
+
         private void SendKeyEventToFlash(Keys key, uint keyEvent)
         {
             // PostMessages causes the Flash window to freeze

@@ -23,6 +23,21 @@ namespace NtxBot
     {
         private static FormUI ui;
 
+        private FlashClient flash;
+
+        private FlashClient Flash
+        {
+            get
+            {
+                if (flash == null)
+                {
+                    flash = new FlashClient();
+                }
+
+                return flash;
+            }
+        }
+
         public string GetAuthor() => "natiiix";
 
         public string[] GetCommands() => new string[0];
@@ -74,17 +89,17 @@ namespace NtxBot
 
             proxy.HookCommand("goto", (client, cmd, args) =>
             {
-                new MovementEngine(client, new FlashClient(), map).BeginMove(new Point(int.Parse(args[0]), int.Parse(args[1])));
+                new MovementEngine(client, Flash, map).BeginMove(new Point(int.Parse(args[0]), int.Parse(args[1])));
             });
 
             proxy.HookCommand("uncover", (client, cmd, args) =>
             {
-                Task.Factory.StartNew(new AbyssBot(client, new FlashClient(), map).UncoverPath);
+                Task.Factory.StartNew(new AbyssBot(client, Flash, map).UncoverPath);
             });
 
             proxy.HookCommand("abyss", (client, cmd, args) =>
             {
-                Task.Factory.StartNew(new AbyssBot(client, new FlashClient(), map).Run);
+                Task.Factory.StartNew(new AbyssBot(client, Flash, map).Run);
             });
 
             proxy.HookCommand("quest", (client, cmd, args) =>
@@ -93,11 +108,17 @@ namespace NtxBot
                 Log("Quest: " + (questObject == null ? "NULL" : GameData.Objects.ByID(questObject.ObjectType).Name));
             });
 
+            proxy.HookCommand("flash", (client, cmd, args) =>
+            {
+                flash = new FlashClient();
+            });
+
             proxy.HookPacket<UpdatePacket>(OnUpdate);
             proxy.HookPacket<NewTickPacket>(OnNewTick);
             proxy.HookPacket<MapInfoPacket>(OnMapInfo);
             proxy.HookPacket<GotoAckPacket>(OnGotoAck);
             proxy.HookPacket<QuestObjIdPacket>(OnQuestObjId);
+            proxy.HookPacket<DamagePacket>(OnDamage);
 
             Log("Packets hooked");
         }
