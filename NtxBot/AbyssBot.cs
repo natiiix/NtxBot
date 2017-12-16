@@ -7,8 +7,8 @@ namespace NtxBot
 {
     public class AbyssBot
     {
-        private const double BOSS_DISTANCE_MIN = 4;
-        private const double BOSS_DISTANCE_MAX = 7;
+        private const double BOSS_DISTANCE_MIN = 5;
+        private const double BOSS_DISTANCE_MAX = 8;
 
         private Client client;
         private FlashClient flash;
@@ -173,7 +173,8 @@ namespace NtxBot
 
             // Order the tiles by their distance from the player in ascending order
             Location playerPos = client.PlayerData.Pos;
-            IOrderedEnumerable<Point> tilesClosestToPlayer = usableTiles.OrderBy(x => ((Location)x).DistanceTo(playerPos));
+            //IOrderedEnumerable<Point> tilesClosestToPlayer = usableTiles.OrderBy(x => ((Location)x).DistanceTo(playerPos));
+            IOrderedEnumerable<Point> tilesClosestToPlayer = usableTiles.OrderBy(x => System.Math.Abs(((Location)x).DistanceTo(playerPos) - 4.0));
 
             // Find the path to the closest possible tile
             Point playerTile = client.GetPlayerLocationAsPoint();
