@@ -1,4 +1,4 @@
-﻿using Lib_K_Relay.GameData;
+﻿using Lib_K_Relay.Networking;
 
 namespace NtxBot
 {

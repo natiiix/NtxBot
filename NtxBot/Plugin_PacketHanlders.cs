@@ -1,11 +1,15 @@
 ﻿using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Networking.Packets.Client;
+using Lib_K_Relay.Networking.Packets.DataObjects;
+using System.Linq;
 
 namespace NtxBot
 {
     public partial class Plugin
     {
+        private const double AUTOHEAL_THRESHOLD = 0.75;
+
         public static bool blockNextGotoAck = false;
 
         private GameMap map;
@@ -31,19 +35,31 @@ namespace NtxBot
         private void OnNewTick(Client client, NewTickPacket p)
         {
             map?.ProcessPacket(p);
+
+            // Heal the player if health is below the threshold
+            if (flash != null && (double)client.PlayerData.Health / client.PlayerData.MaxHealth < AUTOHEAL_THRESHOLD)
+            {
+                flash.UseAbility();
+                Log("Auto-heal triggered!");
+            }
         }
 
         private void OnMapInfo(Client client, MapInfoPacket p)
         {
             // Create a new map object
             map = new GameMap(p);
-
             // Distinct tile and objects are map-specific
             //distinctTiles?.Clear();
             //distinctObjects?.Clear();
 
             // Write the name of the map to the log
             Log("Current map: " + map.Name ?? "null");
+
+            // Give the player a reminder to bind the Flash Player
+            if (flash == null)
+            {
+                Log("Use the /flash command to enable auto-heal!");
+            }
         }
 
         private void OnGotoAck(Client client, GotoAckPacket p)
@@ -58,15 +74,6 @@ namespace NtxBot
         private void OnQuestObjId(Client client, QuestObjIdPacket p)
         {
             map?.ProcessPacket(p);
-        }
-
-        private void OnDamage(Client client, DamagePacket p)
-        {
-            if (p.TargetId == client.ObjectId &&
-                (client.PlayerData.Health - p.Damage) / (double)client.PlayerData.MaxHealth < 0.7)
-            {
-                flash?.UseAbility();
-            }
         }
     }
 }

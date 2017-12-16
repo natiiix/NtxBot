@@ -84,7 +84,7 @@ namespace NtxBot
             // Information about living entities on the current map
             proxy.HookCommand("living", (client, cmd, args) =>
             {
-                map.LivingEntities.ForEach(x => Log(x.ObjectType.ToString() + " - " + GameData.Objects.ByID(x.ObjectType).Name));
+                map.LivingEntities.ForEach(x => Log("Id=" + x.Status.ObjectId.ToString() + " Type=" + x.ObjectType.ToString() + " (" + GameData.Objects.ByID(x.ObjectType).Name + ")"));
             });
 
             proxy.HookCommand("goto", (client, cmd, args) =>
@@ -111,6 +111,7 @@ namespace NtxBot
             proxy.HookCommand("flash", (client, cmd, args) =>
             {
                 flash = new FlashClient();
+                Log("Flash Player binding is now ready");
             });
 
             proxy.HookPacket<UpdatePacket>(OnUpdate);
@@ -118,7 +119,6 @@ namespace NtxBot
             proxy.HookPacket<MapInfoPacket>(OnMapInfo);
             proxy.HookPacket<GotoAckPacket>(OnGotoAck);
             proxy.HookPacket<QuestObjIdPacket>(OnQuestObjId);
-            proxy.HookPacket<DamagePacket>(OnDamage);
 
             Log("Packets hooked");
         }
