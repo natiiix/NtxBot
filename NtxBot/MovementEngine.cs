@@ -19,7 +19,6 @@ namespace NtxBot
         private GameMap map;
 
         private Task moveTask;
-        private CancellationTokenSource moveCTS;
 
         public bool Moving { get => moveTask != null && moveTask.Status == TaskStatus.Running; }
 
@@ -31,8 +30,6 @@ namespace NtxBot
 
             moveTask = null;
         }
-
-        public void CancelMove() => moveCTS?.Cancel();
 
         public void Move(Point target)
         {
@@ -54,25 +51,19 @@ namespace NtxBot
             }
 
             MoveDirectlyAlongPath(shortestPath);
-
-            if (moveCTS == null || !moveCTS.IsCancellationRequested)
-            {
-                Plugin.Log("Arrived at the destination!");
-            }
+            Plugin.Log("Arrived at the destination!");
         }
 
         public void BeginMove(Point target)
         {
-            // Cancel the previous movement task if there was any
+            // Wait for the previous movement task to complete
             if (Moving)
             {
-                moveCTS.Cancel();
                 moveTask.Wait();
             }
 
             // Create a new movement task
-            moveCTS = new CancellationTokenSource();
-            moveTask = Task.Factory.StartNew(() => Move(target), moveCTS.Token);
+            moveTask = Task.Factory.StartNew(() => Move(target));
         }
 
         public void MoveDirectlyToTarget(Location target)
@@ -84,7 +75,7 @@ namespace NtxBot
             // Move towards the target location
             // Loop breaks when the target location is reached, when a task
             // cancellation is requested or when the client connection drops
-            while (client.Connected && (moveCTS == null || !moveCTS.IsCancellationRequested))
+            while (client.Connected)
             {
                 Location playerPos = client.PlayerData.Pos;
 
@@ -139,24 +130,11 @@ namespace NtxBot
 
         public void MoveDirectlyAlongPath(IEnumerable<Point> pathNodes)
         {
-            if (moveCTS != null && moveCTS.IsCancellationRequested)
-            {
-                return;
-            }
-
             // Simplify the path by removing redundant nodes
             IEnumerable<Point> simplified = SimplifyPath(pathNodes);
 
             // Move along the path
-            simplified.ForEach(x =>
-            {
-                if (moveCTS != null && moveCTS.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                MoveDirectlyToTarget((Location)x);
-            });
+            simplified.ForEach(x => MoveDirectlyToTarget((Location)x));
         }
 
         // Removes unnecessary nodes from the path
