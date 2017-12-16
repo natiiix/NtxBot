@@ -40,30 +40,30 @@ namespace NtxBot
         }
 
         private IntPtr flashPtr;
-        private KeyWrapper keyW;
-        private KeyWrapper keyA;
-        private KeyWrapper keyS;
-        private KeyWrapper keyD;
+        private KeyWrapper keyUp;
+        private KeyWrapper keyLeft;
+        private KeyWrapper keyDown;
+        private KeyWrapper keyRight;
 
-        public bool W { set => keyW.Pressed = value; }
-        public bool A { set => keyA.Pressed = value; }
-        public bool S { set => keyS.Pressed = value; }
-        public bool D { set => keyD.Pressed = value; }
+        public bool Up { set => keyUp.Pressed = value; }
+        public bool Left { set => keyLeft.Pressed = value; }
+        public bool Down { set => keyDown.Pressed = value; }
+        public bool Right { set => keyRight.Pressed = value; }
 
         public FlashClient()
         {
             //flashPtr = GetFlashHandle();
             flashPtr = WinApi.GetForegroundWindow();
 
-            keyW = new KeyWrapper(x => SendKeyEventToFlash(Keys.W, x));
-            keyA = new KeyWrapper(x => SendKeyEventToFlash(Keys.A, x));
-            keyS = new KeyWrapper(x => SendKeyEventToFlash(Keys.S, x));
-            keyD = new KeyWrapper(x => SendKeyEventToFlash(Keys.D, x));
+            keyUp = new KeyWrapper(x => SendKeyEventToFlash(Keys.W, x));
+            keyLeft = new KeyWrapper(x => SendKeyEventToFlash(Keys.A, x));
+            keyDown = new KeyWrapper(x => SendKeyEventToFlash(Keys.S, x));
+            keyRight = new KeyWrapper(x => SendKeyEventToFlash(Keys.D, x));
         }
 
         public void StopMovement()
         {
-            W = A = S = D = false;
+            Up = Left = Down = Right = false;
         }
 
         public void UseAbility()

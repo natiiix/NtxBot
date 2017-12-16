@@ -117,10 +117,10 @@ namespace NtxBot
                         (yOffset < 0 && (!map.Tiles[playerTile.X - 1, playerTile.Y - 1].Walkable || !map.Tiles[playerTile.X + 1, playerTile.Y - 1].Walkable)) ||
                         (yOffset > 0 && (!map.Tiles[playerTile.X - 1, playerTile.Y + 1].Walkable || !map.Tiles[playerTile.X + 1, playerTile.Y + 1].Walkable)));
 
-                    flash.A = xOffset < 0 && (xAboveThreshold || yBlocked);
-                    flash.D = xOffset > 0 && (xAboveThreshold || yBlocked);
-                    flash.W = yOffset < 0 && (yAboveThreshold || xBlocked);
-                    flash.S = yOffset > 0 && (yAboveThreshold || xBlocked);
+                    flash.Left = xOffset < 0 && (xAboveThreshold || yBlocked);
+                    flash.Right = xOffset > 0 && (xAboveThreshold || yBlocked);
+                    flash.Up = yOffset < 0 && (yAboveThreshold || xBlocked);
+                    flash.Down = yOffset > 0 && (yAboveThreshold || xBlocked);
                 }
             }
 
