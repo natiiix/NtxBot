@@ -4,7 +4,6 @@ using Lib_K_Relay.Networking.Packets.DataObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace NtxBot

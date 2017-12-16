@@ -1,6 +1,4 @@
-﻿using Lib_K_Relay.Networking;
-
-namespace NtxBot
+﻿namespace NtxBot
 {
     public partial class Plugin
     {
