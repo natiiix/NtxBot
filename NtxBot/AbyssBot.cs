@@ -45,7 +45,7 @@ namespace NtxBot
             {
                 Entity boss = map.QuestObject;
 
-                if (boss == null || client.PlayerData.Pos.DistanceTo(boss.Status.Position) < 16)
+                if (boss == null || client.PlayerData.Pos.DistanceTo(boss.Status.Position) < 25)
                 {
                     break;
                 }
