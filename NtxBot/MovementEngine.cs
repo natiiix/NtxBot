@@ -10,7 +10,6 @@ namespace NtxBot
 {
     public class MovementEngine
     {
-        private const double MOVEMENT_DISTANCE_THRESHOLD = 0.5;
         private static readonly TimeSpan TIME_BEFORE_KEY_RESET = TimeSpan.FromSeconds(1);
 
         private Client client;
@@ -65,7 +64,7 @@ namespace NtxBot
             moveTask = Task.Factory.StartNew(() => Move(target));
         }
 
-        public void MoveDirectlyToTarget(Location target)
+        public void MoveDirectlyToTarget(Location target, double thresholdDistance)
         {
             // Get the current time and player position
             Location lastPlayerPos = client.PlayerData.Pos;
@@ -91,6 +90,9 @@ namespace NtxBot
                     // Stop moving to reset the key states
                     Plugin.Log("Resetting movement key states...");
                     flash.StopMovement();
+
+                    // Reset the time of the last move to avoid flooding the log
+                    dtLastMove = DateTime.Now;
                 }
 
                 // Set movement direction
@@ -98,8 +100,8 @@ namespace NtxBot
                     double xOffset = target.X - playerPos.X;
                     double yOffset = target.Y - playerPos.Y;
 
-                    bool xAboveThreshold = Math.Abs(xOffset) > MOVEMENT_DISTANCE_THRESHOLD;
-                    bool yAboveThreshold = Math.Abs(yOffset) > MOVEMENT_DISTANCE_THRESHOLD;
+                    bool xAboveThreshold = Math.Abs(xOffset) > thresholdDistance;
+                    bool yAboveThreshold = Math.Abs(yOffset) > thresholdDistance;
 
                     if (!xAboveThreshold && !yAboveThreshold)
                     {
@@ -133,7 +135,16 @@ namespace NtxBot
             IEnumerable<Point> simplified = SimplifyPath(pathNodes);
 
             // Move along the path
-            simplified.ForEach(x => MoveDirectlyToTarget((Location)x));
+            simplified.ForEach(x =>
+            {
+                bool surroundingsWalkable =
+                    map.Tiles[x.X - 1, x.Y].Walkable &&
+                    map.Tiles[x.X + 1, x.Y].Walkable &&
+                    map.Tiles[x.X, x.Y - 1].Walkable &&
+                    map.Tiles[x.X, x.Y + 1].Walkable;
+
+                MoveDirectlyToTarget((Location)x, surroundingsWalkable ? 1 : 0.5);
+            });
         }
 
         // Removes unnecessary nodes from the path
