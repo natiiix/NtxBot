@@ -14,6 +14,7 @@ namespace NtxBot
 
         private void OnUpdate(Client client, UpdatePacket p)
         {
+            map?.SetPlayerObjectId(client.ObjectId);
             map?.ProcessPacket(p);
         }
 
@@ -32,7 +33,7 @@ namespace NtxBot
         private void OnMapInfo(Client client, MapInfoPacket p)
         {
             // Create a new map object
-            map = new GameMap(p, client.ObjectId);
+            map = new GameMap(p);
 
             // Write the name of the map to the log
             Log("Current map: " + map.Name ?? "null");
@@ -53,9 +54,6 @@ namespace NtxBot
             }
         }
 
-        private void OnQuestObjId(Client client, QuestObjIdPacket p)
-        {
-            map?.ProcessPacket(p);
-        }
+        private void OnQuestObjId(Client client, QuestObjIdPacket p) => map?.ProcessPacket(p);
     }
 }

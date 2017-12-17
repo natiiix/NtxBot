@@ -114,11 +114,28 @@ namespace NtxBot
                 Log("Flash Player binding is now ready");
             });
 
+            proxy.HookCommand("ability", (client, cmd, args) =>
+            {
+                if (map != null && map.UsePlayerAbility(client))
+                {
+                    Log("Ability used");
+                }
+                else
+                {
+                    Log("Unable to use ability!");
+                }
+            });
+
             proxy.HookPacket<UpdatePacket>(OnUpdate);
             proxy.HookPacket<NewTickPacket>(OnNewTick);
             proxy.HookPacket<MapInfoPacket>(OnMapInfo);
             proxy.HookPacket<GotoAckPacket>(OnGotoAck);
             proxy.HookPacket<QuestObjIdPacket>(OnQuestObjId);
+            //proxy.HookPacket<UseItemPacket>((client, p) =>
+            //{
+            //    Log("Player ObjectId: " + client.ObjectId.ToString());
+            //    Log("Id=" + p.Id.ToString() + " ItemUsePos=" + p.ItemUsePos.ToString() + " SlotObject={" + "ObjectId=" + p.SlotObject.ObjectId.ToString() + " ObjectType=" + p.SlotObject.ObjectType.ToString() + " SlotId=" + p.SlotObject.SlotId.ToString() + "} Time=" + p.Time.ToString() + " UseType=" + p.UseType.ToString());
+            //});
 
             Log("Packets hooked");
         }

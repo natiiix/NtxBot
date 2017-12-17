@@ -1,7 +1,10 @@
 ﻿using Lib_K_Relay.GameData;
 using Lib_K_Relay.GameData.DataStructures;
+using Lib_K_Relay.Networking;
+using Lib_K_Relay.Networking.Packets;
 using Lib_K_Relay.Networking.Packets.DataObjects;
 using Lib_K_Relay.Networking.Packets.Server;
+using Lib_K_Relay.Networking.Packets.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +30,7 @@ namespace NtxBot
 
         private Entity PlayerObject { get => FindEntityById(playerObjectId); }
 
-        public GameMap(MapInfoPacket mip, int playerObjectId)
+        public GameMap(MapInfoPacket mip)
         {
             Name = mip.Name;
             Width = mip.Width;
@@ -46,7 +49,7 @@ namespace NtxBot
 
             LivingEntities = new List<Entity>();
             questObjectId = -1;
-            this.playerObjectId = playerObjectId;
+            playerObjectId = -1;
         }
 
         public void ProcessPacket(UpdatePacket p)
@@ -98,7 +101,25 @@ namespace NtxBot
             // Update statuses of living entities
             foreach (Status stat in p.Statuses)
             {
-                LivingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x => x.Status = stat);
+                //LivingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x => x.Status = stat);
+
+                LivingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x =>
+                {
+                    // Update object's position
+                    x.Status.Position = stat.Position;
+
+                    // Update status data
+                    foreach (StatData data in stat.Data)
+                    {
+                        for (int i = 0; i < x.Status.Data.Length; i++)
+                        {
+                            if (data.Id == x.Status.Data[i].Id)
+                            {
+                                x.Status.Data[i] = data;
+                            }
+                        }
+                    }
+                });
             }
         }
 
@@ -203,6 +224,46 @@ namespace NtxBot
                 return dist >= minDistance && dist <= maxDistance;
             });
         }
+
+        public bool UsePlayerAbility(Client client, Location usePosition = null)
+        {
+            Entity player = PlayerObject;
+
+            // Client object doesn't exist
+            if (player == null)
+            {
+                return false;
+            }
+
+            // Iterate through player data
+            foreach (StatData stat in player.Status.Data)
+            {
+                // If player has an ability item equipped
+                if (stat.Id == StatsType.Inventory1 && stat.IntValue >= 0)
+                {
+                    UseItemPacket p = Packet.Create<UseItemPacket>(PacketType.USEITEM);
+
+                    p.Time = client.Time;
+                    p.ItemUsePos = usePosition ?? client.PlayerData.Pos;
+                    p.UseType = 1;
+
+                    p.SlotObject = new SlotObject()
+                    {
+                        ObjectId = client.ObjectId,
+                        ObjectType = stat.IntValue,
+                        SlotId = 1
+                    };
+
+                    client.SendToServer(p);
+                    return true;
+                }
+            }
+
+            // Unable to find an equipped ability item
+            return false;
+        }
+
+        public void SetPlayerObjectId(int objectId) => playerObjectId = objectId;
 
         private Entity FindEntityById(int objectId)
         {
