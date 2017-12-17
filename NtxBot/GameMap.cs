@@ -17,29 +17,17 @@ namespace NtxBot
         public GameMapTile[,] Tiles { get; private set; }
         public List<Entity> LivingEntities { get; private set; }
 
-        public Entity QuestObject
-        {
-            get
-            {
-                if (questObjectId < 0)
-                {
-                    return null;
-                }
-
-                int idx = LivingEntities.FindIndex(x => x.Status.ObjectId == questObjectId);
-
-                if (idx < 0)
-                {
-                    return null;
-                }
-
-                return LivingEntities[idx];
-            }
-        }
-
+        // Quest
         private int questObjectId;
 
-        public GameMap(MapInfoPacket mip)
+        public Entity QuestObject { get => FindEntityById(questObjectId); }
+
+        // Player
+        private int playerObjectId;
+
+        private Entity PlayerObject { get => FindEntityById(playerObjectId); }
+
+        public GameMap(MapInfoPacket mip, int playerObjectId)
         {
             Name = mip.Name;
             Width = mip.Width;
@@ -58,6 +46,7 @@ namespace NtxBot
 
             LivingEntities = new List<Entity>();
             questObjectId = -1;
+            this.playerObjectId = playerObjectId;
         }
 
         public void ProcessPacket(UpdatePacket p)
@@ -213,6 +202,23 @@ namespace NtxBot
                 double dist = x.DistanceTo(baseTile);
                 return dist >= minDistance && dist <= maxDistance;
             });
+        }
+
+        private Entity FindEntityById(int objectId)
+        {
+            if (objectId < 0)
+            {
+                return null;
+            }
+
+            int idx = LivingEntities.FindIndex(x => x.Status.ObjectId == objectId);
+
+            if (idx < 0)
+            {
+                return null;
+            }
+
+            return LivingEntities[idx];
         }
     }
 }

@@ -32,7 +32,7 @@ namespace NtxBot
         private void OnMapInfo(Client client, MapInfoPacket p)
         {
             // Create a new map object
-            map = new GameMap(p);
+            map = new GameMap(p, client.ObjectId);
 
             // Write the name of the map to the log
             Log("Current map: " + map.Name ?? "null");
