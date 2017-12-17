@@ -1,6 +1,7 @@
 ﻿using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets.Client;
 using Lib_K_Relay.Networking.Packets.Server;
+using Lib_K_Relay.Utilities;
 
 namespace NtxBot
 {
@@ -22,10 +23,14 @@ namespace NtxBot
         {
             map?.ProcessPacket(p);
 
-            // Heal the player if health is below the threshold
-            if (flash != null && (double)client.PlayerData.Health / client.PlayerData.MaxHealth < AUTOHEAL_THRESHOLD)
+            // Heal the player if:
+            // - playing priest
+            // - does not have Sick debuff (an attempt to heal with Sick would be a waste of mana)
+            // - health is below threshold
+            if (client.PlayerData.Class == Classes.Priest && !client.PlayerData.HasConditionEffect(ConditionEffects.Sick) &&
+                (double)client.PlayerData.Health / client.PlayerData.MaxHealth < AUTOHEAL_THRESHOLD)
             {
-                flash.UseAbility();
+                map?.UsePlayerAbility(client);
                 Log("Auto-heal triggered!");
             }
         }
@@ -37,12 +42,6 @@ namespace NtxBot
 
             // Write the name of the map to the log
             Log("Current map: " + map.Name ?? "null");
-
-            // Give the player a reminder to bind the Flash Player
-            if (flash == null)
-            {
-                Log("Use the /flash command to enable auto-heal!");
-            }
         }
 
         private void OnGotoAck(Client client, GotoAckPacket p)

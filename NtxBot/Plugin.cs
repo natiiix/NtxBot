@@ -23,21 +23,6 @@ namespace NtxBot
     {
         private static FormUI ui;
 
-        private FlashClient flash;
-
-        private FlashClient Flash
-        {
-            get
-            {
-                if (flash == null)
-                {
-                    flash = new FlashClient();
-                }
-
-                return flash;
-            }
-        }
-
         public string GetAuthor() => "natiiix";
 
         public string[] GetCommands() => new string[0];
@@ -87,44 +72,38 @@ namespace NtxBot
                 map.LivingEntities.ForEach(x => Log("Id=" + x.Status.ObjectId.ToString() + " Type=" + x.ObjectType.ToString() + " (" + GameData.Objects.ByID(x.ObjectType).Name + ")"));
             });
 
-            proxy.HookCommand("goto", (client, cmd, args) =>
-            {
-                new MovementEngine(client, Flash, map).BeginMove(new Point(int.Parse(args[0]), int.Parse(args[1])));
-            });
+            //proxy.HookCommand("goto", (client, cmd, args) =>
+            //{
+            //    new MovementEngine(client, new FlashClient(), map).BeginMove(new Point(int.Parse(args[0]), int.Parse(args[1])));
+            //});
 
-            proxy.HookCommand("uncover", (client, cmd, args) =>
-            {
-                Task.Factory.StartNew(new AbyssBot(client, Flash, map).UncoverPath);
-            });
+            //proxy.HookCommand("uncover", (client, cmd, args) =>
+            //{
+            //    Task.Factory.StartNew(new AbyssBot(client, new FlashClient(), map).UncoverPath);
+            //});
 
             proxy.HookCommand("abyss", (client, cmd, args) =>
             {
-                Task.Factory.StartNew(new AbyssBot(client, Flash, map).Run);
+                Task.Factory.StartNew(new AbyssBot(client, new FlashClient(), map).Run);
             });
 
-            proxy.HookCommand("quest", (client, cmd, args) =>
-            {
-                Entity questObject = map?.QuestObject;
-                Log("Quest: " + (questObject == null ? "NULL" : GameData.Objects.ByID(questObject.ObjectType).Name));
-            });
+            //proxy.HookCommand("quest", (client, cmd, args) =>
+            //{
+            //    Entity questObject = map?.QuestObject;
+            //    Log("Quest: " + (questObject == null ? "NULL" : GameData.Objects.ByID(questObject.ObjectType).Name));
+            //});
 
-            proxy.HookCommand("flash", (client, cmd, args) =>
-            {
-                flash = new FlashClient();
-                Log("Flash Player binding is now ready");
-            });
-
-            proxy.HookCommand("ability", (client, cmd, args) =>
-            {
-                if (map != null && map.UsePlayerAbility(client))
-                {
-                    Log("Ability used");
-                }
-                else
-                {
-                    Log("Unable to use ability!");
-                }
-            });
+            //proxy.HookCommand("ability", (client, cmd, args) =>
+            //{
+            //    if (map != null && map.UsePlayerAbility(client))
+            //    {
+            //        Log("Ability used");
+            //    }
+            //    else
+            //    {
+            //        Log("Unable to use ability!");
+            //    }
+            //});
 
             proxy.HookPacket<UpdatePacket>(OnUpdate);
             proxy.HookPacket<NewTickPacket>(OnNewTick);
@@ -137,7 +116,7 @@ namespace NtxBot
             //    Log("Id=" + p.Id.ToString() + " ItemUsePos=" + p.ItemUsePos.ToString() + " SlotObject={" + "ObjectId=" + p.SlotObject.ObjectId.ToString() + " ObjectType=" + p.SlotObject.ObjectType.ToString() + " SlotId=" + p.SlotObject.SlotId.ToString() + "} Time=" + p.Time.ToString() + " UseType=" + p.UseType.ToString());
             //});
 
-            Log("Packets hooked");
+            Log("Commands and packets hooked");
         }
     }
 }
