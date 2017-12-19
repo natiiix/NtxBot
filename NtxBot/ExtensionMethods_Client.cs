@@ -1,7 +1,10 @@
 ﻿using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets;
 using Lib_K_Relay.Networking.Packets.Client;
+using Lib_K_Relay.Networking.Packets.DataObjects;
+using Lib_K_Relay.Networking.Packets.Server;
 using Lib_K_Relay.Utilities;
+using System.Threading.Tasks;
 
 namespace NtxBot
 {
@@ -37,5 +40,16 @@ namespace NtxBot
         }
 
         public static Point GetPlayerLocationAsPoint(this Client client) => (Point)client.PlayerData.Pos;
+
+        public static void JumpUsingGOTO(this Client client, Location target, int msDelay)
+        {
+            GotoPacket p = Packet.Create<GotoPacket>(PacketType.GOTO);
+
+            p.Location = target;
+            p.ObjectId = client.ObjectId;
+
+            client.SendToClient(p);
+            Task.Delay(msDelay);
+        }
     }
 }

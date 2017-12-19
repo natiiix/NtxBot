@@ -100,13 +100,7 @@ namespace NtxBot
                     // If close enough to the target, use GOTO to jump to the exact location
                     if (playerPos.DistanceTo(target) <= MAX_GOTO_DISTANCE)
                     {
-                        GotoPacket p = Packet.Create<GotoPacket>(PacketType.GOTO);
-
-                        p.Location = target;
-                        p.ObjectId = client.ObjectId;
-
-                        client.SendToClient(p);
-                        Task.Delay(100);
+                        client.JumpUsingGOTO(target, 100);
                         return;
                     }
 
