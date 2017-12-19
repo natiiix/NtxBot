@@ -24,11 +24,17 @@ namespace NtxBot
             map?.ProcessPacket(p);
 
             // Heal the player if:
-            // - playing priest
-            // - does not have Sick debuff (an attempt to heal with Sick would be a waste of mana)
-            // - health is below threshold
-            if (client.PlayerData.Class == Classes.Priest && !client.PlayerData.HasConditionEffect(ConditionEffects.Sick) &&
-                (double)client.PlayerData.Health / client.PlayerData.MaxHealth < AUTOHEAL_THRESHOLD)
+            if (
+                // playing priest
+                client.PlayerData.Class == Classes.Priest &&
+                // does not have Sick debuff (an attempt to heal with Sick would be a waste of mana)
+                !client.PlayerData.HasConditionEffect(ConditionEffects.Sick) &&
+                // health is below threshold
+                (double)client.PlayerData.Health / client.PlayerData.MaxHealth < AUTOHEAL_THRESHOLD &&
+                // has an ability item equipped
+                map.PlayerAbility != null &&
+                // has enough MP to use the ability
+                client.PlayerData.Mana >= map.PlayerAbility.MpCost)
             {
                 map?.UsePlayerAbility(client);
                 Log("Auto-heal triggered!");
