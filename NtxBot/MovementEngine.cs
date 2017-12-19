@@ -1,16 +1,22 @@
 ﻿using Lib_K_Relay.GameData;
 using Lib_K_Relay.Networking;
 using Lib_K_Relay.Networking.Packets.DataObjects;
+using Lib_K_Relay.Networking.Packets.Client;
+using Lib_K_Relay.Networking.Packets.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Lib_K_Relay.Networking.Packets;
 
 namespace NtxBot
 {
     public class MovementEngine
     {
         private static readonly TimeSpan TIME_BEFORE_KEY_RESET = TimeSpan.FromSeconds(1);
+        private const double THRESHOLD_DISTANCE_UNSAFE = 0.5;
+        private const double THRESHOLD_DISTANCE_SAFE = 0.9;
+        private const double MAX_GOTO_DISTANCE = THRESHOLD_DISTANCE_UNSAFE;
 
         private Client client;
         private FlashClient flash;
@@ -91,6 +97,19 @@ namespace NtxBot
                     Plugin.Log("Resetting movement key states...");
                     flash.StopMovement();
 
+                    // If close enough to the target, use GOTO to jump to the exact location
+                    if (playerPos.DistanceTo(target) <= MAX_GOTO_DISTANCE)
+                    {
+                        GotoPacket p = Packet.Create<GotoPacket>(PacketType.GOTO);
+
+                        p.Location = target;
+                        p.ObjectId = client.ObjectId;
+
+                        client.SendToClient(p);
+                        Task.Delay(100);
+                        return;
+                    }
+
                     // Reset the time of the last move to avoid flooding the log
                     dtLastMove = DateTime.Now;
                 }
@@ -118,6 +137,8 @@ namespace NtxBot
                         (yOffset < 0 && (!map.Tiles[playerTile.X - 1, playerTile.Y - 1].Walkable || !map.Tiles[playerTile.X + 1, playerTile.Y - 1].Walkable)) ||
                         (yOffset > 0 && (!map.Tiles[playerTile.X - 1, playerTile.Y + 1].Walkable || !map.Tiles[playerTile.X + 1, playerTile.Y + 1].Walkable)));
 
+                    client.PlayerData.Speed = 30;
+
                     flash.Left = xOffset < 0 && (xAboveThreshold || yBlocked);
                     flash.Right = xOffset > 0 && (xAboveThreshold || yBlocked);
                     flash.Up = yOffset < 0 && (yAboveThreshold || xBlocked);
@@ -141,9 +162,13 @@ namespace NtxBot
                     map.Tiles[x.X - 1, x.Y].Walkable &&
                     map.Tiles[x.X + 1, x.Y].Walkable &&
                     map.Tiles[x.X, x.Y - 1].Walkable &&
-                    map.Tiles[x.X, x.Y + 1].Walkable;
+                    map.Tiles[x.X, x.Y + 1].Walkable &&
+                    map.Tiles[x.X - 1, x.Y - 1].Walkable &&
+                    map.Tiles[x.X - 1, x.Y + 1].Walkable &&
+                    map.Tiles[x.X + 1, x.Y - 1].Walkable &&
+                    map.Tiles[x.X + 1, x.Y + 1].Walkable;
 
-                MoveDirectlyToTarget((Location)x, surroundingsWalkable ? 1 : 0.5);
+                MoveDirectlyToTarget((Location)x, surroundingsWalkable ? THRESHOLD_DISTANCE_SAFE : THRESHOLD_DISTANCE_UNSAFE);
             });
         }
 

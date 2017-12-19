@@ -28,7 +28,10 @@ namespace NtxBot
         // Player
         private int playerObjectId;
 
-        private Entity PlayerObject { get => FindEntityById(playerObjectId); }
+        public Entity PlayerObject { get => FindEntityById(playerObjectId); }
+
+        // Player's special ability
+        public ObjectStructure PlayerAbility { get => GetPlayerAbility(); }
 
         public GameMap(MapInfoPacket mip)
         {
@@ -225,14 +228,15 @@ namespace NtxBot
             });
         }
 
-        public bool UsePlayerAbility(Client client, Location usePosition = null)
+        public ObjectStructure GetPlayerAbility()
         {
+            // Get the object representing the player's character
             Entity player = PlayerObject;
 
             // Client object doesn't exist
             if (player == null)
             {
-                return false;
+                return null;
             }
 
             // Iterate through player data
@@ -241,26 +245,41 @@ namespace NtxBot
                 // If player has an ability item equipped
                 if (stat.Id == StatsType.Inventory1 && stat.IntValue >= 0)
                 {
-                    UseItemPacket p = Packet.Create<UseItemPacket>(PacketType.USEITEM);
-
-                    p.Time = client.Time;
-                    p.ItemUsePos = usePosition ?? client.PlayerData.Pos;
-                    p.UseType = 1;
-
-                    p.SlotObject = new SlotObject()
-                    {
-                        ObjectId = client.ObjectId,
-                        ObjectType = stat.IntValue,
-                        SlotId = 1
-                    };
-
-                    client.SendToServer(p);
-                    return true;
+                    // Return the ObjectStructure of the item
+                    return GameData.Objects.ByID((ushort)stat.IntValue);
                 }
             }
 
             // Unable to find an equipped ability item
-            return false;
+            return null;
+        }
+
+        public void UsePlayerAbility(Client client, Location usePosition = null)
+        {
+            ObjectStructure ability = PlayerAbility;
+
+            // Ability item is not available
+            if (ability == null)
+            {
+                Plugin.Log("Unable to use special ability! Ability item is unavailable!");
+                return;
+            }
+
+            // Use the ability item by sending a UseItem packet to the server
+            UseItemPacket p = Packet.Create<UseItemPacket>(PacketType.USEITEM);
+
+            p.Time = client.Time;
+            p.ItemUsePos = usePosition ?? client.PlayerData.Pos;
+            p.UseType = 1;
+
+            p.SlotObject = new SlotObject()
+            {
+                ObjectId = client.ObjectId,
+                ObjectType = ability.ID,
+                SlotId = 1
+            };
+
+            client.SendToServer(p);
         }
 
         public void SetPlayerObjectId(int objectId) => playerObjectId = objectId;

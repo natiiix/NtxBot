@@ -13,6 +13,9 @@ namespace NtxBot
 
         private GameMap map;
 
+        // Prevents auto-heal from being use on two consecutive ticks
+        private bool autoHealReady = true;
+
         private void OnUpdate(Client client, UpdatePacket p)
         {
             map?.SetPlayerObjectId(client.ObjectId);
@@ -25,6 +28,8 @@ namespace NtxBot
 
             // Heal the player if:
             if (
+                // Auto-heal hasn't been triggered the last tick
+                autoHealReady &&
                 // playing priest
                 client.PlayerData.Class == Classes.Priest &&
                 // does not have Sick debuff (an attempt to heal with Sick would be a waste of mana)
@@ -37,7 +42,12 @@ namespace NtxBot
                 client.PlayerData.Mana >= map.PlayerAbility.MpCost)
             {
                 map?.UsePlayerAbility(client);
+                autoHealReady = false;
                 Log("Auto-heal triggered!");
+            }
+            else
+            {
+                autoHealReady = true;
             }
         }
 
