@@ -20,8 +20,10 @@ namespace NtxBot
                 richTextBoxLog.Text += Environment.NewLine;
             }
 
+            DateTime dtNow = DateTime.Now;
+
             // Append the input text to the log
-            richTextBoxLog.Text += text;
+            richTextBoxLog.Text += string.Format("[{0}.{1:000}] {2}", dtNow.ToLongTimeString(), dtNow.Millisecond, text);
 
             // Scroll the rich text box to its end
             richTextBoxLog.SelectionStart = richTextBoxLog.Text.Length;
