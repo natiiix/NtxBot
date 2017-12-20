@@ -13,7 +13,7 @@ namespace NtxBot
 {
     public class MovementEngine
     {
-        private static readonly TimeSpan TIME_BEFORE_KEY_RESET = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan TIME_STUCK = TimeSpan.FromSeconds(0.5);
         private const double THRESHOLD_DISTANCE_UNSAFE = 0.5;
         private const double THRESHOLD_DISTANCE_SAFE = 0.9;
         private const double MAX_GOTO_DISTANCE = THRESHOLD_DISTANCE_UNSAFE;
@@ -82,6 +82,7 @@ namespace NtxBot
             while (client.Connected)
             {
                 Location playerPos = client.PlayerData.Pos;
+                bool stuck = false;
 
                 // Player has moved since the last tick
                 if (lastPlayerPos.X != playerPos.X || lastPlayerPos.Y != playerPos.Y)
@@ -91,18 +92,23 @@ namespace NtxBot
                     dtLastMove = DateTime.Now;
                 }
                 // Player hasn't moved for too long
-                else if (DateTime.Now - dtLastMove >= TIME_BEFORE_KEY_RESET)
+                else if (DateTime.Now - dtLastMove >= TIME_STUCK)
                 {
                     // Stop moving to reset the key states
-                    Plugin.Log("Resetting movement key states...");
+                    Plugin.Log("Stuck! Resetting movement key states...");
                     flash.StopMovement();
+                    stuck = true;
 
-                    // If close enough to the target, use GOTO to jump to the exact location
-                    if (playerPos.DistanceTo(target) <= MAX_GOTO_DISTANCE)
-                    {
-                        client.JumpUsingGOTO(target, 100);
-                        return;
-                    }
+                    //double distanceToTarget = playerPos.DistanceTo(target);
+                    //Plugin.Log("Distance to target: " + distanceToTarget.ToString());
+
+                    //// If close enough to the target, use GOTO to jump to the exact location
+                    //if (distanceToTarget <= MAX_GOTO_DISTANCE)
+                    //{
+                    //    Plugin.Log("Close enough to the target location! Jumping via a GOTO packet...");
+                    //    client.JumpUsingGOTO(target, 200);
+                    //    return;
+                    //}
 
                     // Reset the time of the last move to avoid flooding the log
                     dtLastMove = DateTime.Now;
@@ -113,12 +119,30 @@ namespace NtxBot
                     double xOffset = target.X - playerPos.X;
                     double yOffset = target.Y - playerPos.Y;
 
-                    bool xAboveThreshold = Math.Abs(xOffset) > thresholdDistance;
-                    bool yAboveThreshold = Math.Abs(yOffset) > thresholdDistance;
+                    double xOffsetAbs = Math.Abs(xOffset);
+                    double yOffsetAbs = Math.Abs(yOffset);
+
+                    bool xAboveThreshold = xOffsetAbs > thresholdDistance;
+                    bool yAboveThreshold = yOffsetAbs > thresholdDistance;
 
                     if (!xAboveThreshold && !yAboveThreshold)
                     {
                         break;
+                    }
+
+                    // Try to get un-stuck
+                    if (stuck)
+                    {
+                        if (!xAboveThreshold && xOffsetAbs > 0)
+                        {
+                            Plugin.Log("Doing a horizontal GOTO jump! Distance: " + xOffsetAbs.ToString());
+                            client.JumpUsingGOTO(new Location(target.X, playerPos.Y), 200);
+                        }
+                        else if (!yAboveThreshold && yOffsetAbs > 0)
+                        {
+                            Plugin.Log("Doing a vertical GOTO jump! Distance: " + yOffsetAbs.ToString());
+                            client.JumpUsingGOTO(new Location(playerPos.X, target.Y), 200);
+                        }
                     }
 
                     Point playerTile = (Point)playerPos;
@@ -130,8 +154,6 @@ namespace NtxBot
                     bool yBlocked = yAboveThreshold && (
                         (yOffset < 0 && (!map.Tiles[playerTile.X - 1, playerTile.Y - 1].Walkable || !map.Tiles[playerTile.X + 1, playerTile.Y - 1].Walkable)) ||
                         (yOffset > 0 && (!map.Tiles[playerTile.X - 1, playerTile.Y + 1].Walkable || !map.Tiles[playerTile.X + 1, playerTile.Y + 1].Walkable)));
-
-                    client.PlayerData.Speed = 30;
 
                     flash.Left = xOffset < 0 && (xAboveThreshold || yBlocked);
                     flash.Right = xOffset > 0 && (xAboveThreshold || yBlocked);
@@ -156,11 +178,11 @@ namespace NtxBot
                     map.Tiles[x.X - 1, x.Y].Walkable &&
                     map.Tiles[x.X + 1, x.Y].Walkable &&
                     map.Tiles[x.X, x.Y - 1].Walkable &&
-                    map.Tiles[x.X, x.Y + 1].Walkable &&
+                    map.Tiles[x.X, x.Y + 1].Walkable/* &&
                     map.Tiles[x.X - 1, x.Y - 1].Walkable &&
                     map.Tiles[x.X - 1, x.Y + 1].Walkable &&
                     map.Tiles[x.X + 1, x.Y - 1].Walkable &&
-                    map.Tiles[x.X + 1, x.Y + 1].Walkable;
+                    map.Tiles[x.X + 1, x.Y + 1].Walkable*/;
 
                 MoveDirectlyToTarget((Location)x, surroundingsWalkable ? THRESHOLD_DISTANCE_SAFE : THRESHOLD_DISTANCE_UNSAFE);
             });

@@ -104,22 +104,17 @@ namespace NtxBot
             // Update statuses of living entities
             foreach (Status stat in p.Statuses)
             {
-                //LivingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x => x.Status = stat);
-
                 LivingEntities.FindAll(x => x.Status.ObjectId == stat.ObjectId).ForEach(x =>
                 {
                     // Update object's position
                     x.Status.Position = stat.Position;
 
                     // Update status data
-                    foreach (StatData data in stat.Data)
+                    for (int i = 0; i < x.Status.Data.Length; i++)
                     {
-                        for (int i = 0; i < x.Status.Data.Length; i++)
+                        foreach (StatData data in stat.Data.Where(y => y.Id == x.Status.Data[i].Id))
                         {
-                            if (data.Id == x.Status.Data[i].Id)
-                            {
-                                x.Status.Data[i] = data;
-                            }
+                            x.Status.Data[i] = data;
                         }
                     }
                 });
